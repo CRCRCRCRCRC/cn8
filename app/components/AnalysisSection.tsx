@@ -33,9 +33,8 @@ const AI_MODELS = {
 }
 
 export default function AnalysisSection({ isDevMode }: AnalysisSectionProps) {
-  const [selectedModel, setSelectedModel] = useState('gpt-4.1-nano-2025-04-14')
+  const [selectedModel, setSelectedModel] = useState('o3-2025-04-16') // 預設使用高品質模型
   const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [fastMode, setFastMode] = useState(false)
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
   const [detailedReport, setDetailedReport] = useState<string>('')
   const [error, setError] = useState<string>('')
@@ -54,8 +53,7 @@ export default function AnalysisSection({ isDevMode }: AnalysisSectionProps) {
         },
         body: JSON.stringify({
           model: selectedModel,
-          isDevMode,
-          fastMode
+          isDevMode
         }),
       })
 
@@ -131,34 +129,22 @@ export default function AnalysisSection({ isDevMode }: AnalysisSectionProps) {
         </div>
       </motion.div>
 
-      {/* Fast Mode Toggle */}
+      {/* Premium Analysis Notice */}
       <motion.div 
         className="text-center mb-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.6 }}
       >
-        <label className="flex items-center justify-center space-x-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={fastMode}
-            onChange={(e) => setFastMode(e.target.checked)}
-            className="sr-only"
-          />
-          <div className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${
-            fastMode ? 'bg-cyber-accent' : 'bg-gray-600'
-          }`}>
-            <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 ${
-              fastMode ? 'translate-x-6' : 'translate-x-0'
-            }`}></div>
-          </div>
-          <span className="font-mono text-sm text-cyber-primary">
-            {fastMode ? '⚡ 快速模式 (2-3秒)' : '🔍 增強模式 (5-8秒)'}
-          </span>
-        </label>
-        <p className="text-xs text-gray-400 mt-2 font-mono">
-          {fastMode ? '使用備用數據，極速分析' : '獲取即時數據，深度分析'}
-        </p>
+        <div className="cyber-border rounded-lg p-4 bg-gradient-to-r from-purple-900/20 to-blue-900/20 backdrop-blur-sm">
+          <h4 className="text-lg font-cyber font-bold text-cyber-primary mb-2">
+            🎯 專業級深度分析
+          </h4>
+          <p className="text-sm text-gray-300 font-mono leading-relaxed">
+            系統將獲取最新市場數據、全面新聞資訊，並使用頂級 AI 模型進行深度分析<br/>
+            <span className="text-cyber-accent">追求最高質量的分析結果，不考慮時間限制</span>
+          </p>
+        </div>
       </motion.div>
 
       {/* Analysis Button */}
@@ -176,12 +162,12 @@ export default function AnalysisSection({ isDevMode }: AnalysisSectionProps) {
           {isAnalyzing ? (
             <>
               <Loader className="inline-block w-6 h-6 mr-2 animate-spin" />
-              {fastMode ? '快速分析中' : '深度分析中'}<span className="loading-dots"></span>
+              專業分析進行中<span className="loading-dots"></span>
             </>
           ) : (
             <>
               <Brain className="inline-block w-6 h-6 mr-2" />
-              {fastMode ? '⚡ 快速分析' : '🔍 深度分析'}
+              🎯 開始專業分析
             </>
           )}
         </button>
