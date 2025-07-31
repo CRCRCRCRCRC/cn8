@@ -8,7 +8,7 @@ interface HeaderProps {
 }
 
 export default function Header({ onStartAnalysis }: HeaderProps) {
-  const { user, isDevMode, credits, logout } = useAuth()
+  const { user, isDevMode, userCredits, logout } = useAuth()
   const [showUserMenu, setShowUserMenu] = useState(false)
 
   const handleSignOut = () => {
@@ -66,7 +66,7 @@ export default function Header({ onStartAnalysis }: HeaderProps) {
                 >
                   <Zap className="w-5 h-5 text-cyber-primary" />
                   <span className="font-mono text-cyber-primary">
-                    剩餘 {credits}/1000 積分
+                    剩餘 {userCredits?.credits || 0}/{userCredits?.maxCredits || 1000} 積分
                   </span>
                 </motion.div>
               )}
@@ -79,9 +79,9 @@ export default function Header({ onStartAnalysis }: HeaderProps) {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  {user?.image ? (
+                  {user?.picture ? (
                     <img 
-                      src={user.image} 
+                      src={user.picture} 
                       alt="User Avatar" 
                       className="w-8 h-8 rounded-full"
                     />

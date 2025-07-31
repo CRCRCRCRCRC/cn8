@@ -2,7 +2,7 @@
 
 const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY
 
-// AI 模型配置
+// AI 模型配置 - 完全按照開發計畫.md
 export const AI_MODELS = {
   'gpt-4.1-nano-2025-04-14': { cost: 2.5, name: 'GPT-4.1 Nano', apiModel: 'gpt-4' },
   'o4-mini-2025-04-16': { cost: 27.5, name: 'O4 Mini', apiModel: 'gpt-4' },

@@ -1,13 +1,16 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Chrome, Shield, Code, ArrowLeft } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
+import { renderGoogleSignInButton } from '../services/auth'
 
 export default function LoginPage() {
   const navigate = useNavigate()
-  const { user, login } = useAuth()
+  const { user, initAuth } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
+  const googleButtonRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (user) {
@@ -15,26 +18,45 @@ export default function LoginPage() {
     }
   }, [user, navigate])
 
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true)
-    try {
-      // 模擬 Google 登入
-      setTimeout(() => {
-        const mockUser = {
-          id: '1',
-          name: '測試用戶',
-          email: 'test@example.com',
-          image: 'https://via.placeholder.com/40'
+  useEffect(() => {
+    // 初始化 Google Auth
+    const initializeAuth = async () => {
+      try {
+        setIsLoading(true)
+        await initAuth()
+        
+        // 渲染 Google 登入按鈕
+        if (googleButtonRef.current) {
+          renderGoogleSignInButton(googleButtonRef.current)
         }
-        login(mockUser)
-        navigate('/')
-      }, 1000)
-    } catch (error) {
-      console.error('Sign in error:', error)
-    } finally {
-      setIsLoading(false)
+      } catch (error) {
+        console.error('Failed to initialize auth:', error)
+        setError('無法載入 Google 登入服務')
+      } finally {
+        setIsLoading(false)
+      }
     }
-  }
+
+    initializeAuth()
+
+    // 監聽登入成功事件
+    const handleLoginSuccess = () => {
+      navigate('/')
+    }
+
+    const handleLoginError = (event: CustomEvent) => {
+      setError('Google 登入失敗，請重試')
+      console.error('Google login error:', event.detail)
+    }
+
+    window.addEventListener('googleLogin', handleLoginSuccess)
+    window.addEventListener('googleLoginError', handleLoginError as EventListener)
+
+    return () => {
+      window.removeEventListener('googleLogin', handleLoginSuccess)
+      window.removeEventListener('googleLoginError', handleLoginError as EventListener)
+    }
+  }, [initAuth, navigate])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyber-dark via-gray-900 to-cyber-darker flex items-center justify-center p-4">
@@ -98,23 +120,25 @@ export default function LoginPage() {
           </div>
 
           {/* Google Sign In Button */}
-          <motion.button
-            onClick={handleGoogleSignIn}
-            disabled={isLoading}
-            className="w-full bg-white text-gray-800 py-4 px-6 rounded-lg font-bold text-lg hover:bg-gray-100 transition-all duration-300 flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed mb-6"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+          <motion.div
+            className="mb-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
           >
             {isLoading ? (
-              <div className="w-6 h-6 border-2 border-gray-600 border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-full bg-white text-gray-800 py-4 px-6 rounded-lg font-bold text-lg flex items-center justify-center space-x-3">
+                <div className="w-6 h-6 border-2 border-gray-600 border-t-transparent rounded-full animate-spin"></div>
+                <span>載入 Google 登入...</span>
+              </div>
+            ) : error ? (
+              <div className="w-full bg-red-100 text-red-800 py-4 px-6 rounded-lg font-bold text-lg flex items-center justify-center space-x-3 mb-4">
+                <span>{error}</span>
+              </div>
             ) : (
-              <Chrome className="w-6 h-6" />
+              <div ref={googleButtonRef} className="w-full"></div>
             )}
-            <span>{isLoading ? '登入中...' : '使用 Google 登入'}</span>
-          </motion.button>
+          </motion.div>
 
           {/* Developer Link */}
           <motion.div 

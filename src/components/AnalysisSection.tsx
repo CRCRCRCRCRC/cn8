@@ -29,7 +29,7 @@ const AI_MODEL_DESCRIPTIONS = {
 }
 
 export default function AnalysisSection() {
-  const { isDevMode, useCredits } = useAuth()
+  const { isDevMode, useCredits, userCredits } = useAuth()
   const [selectedModel, setSelectedModel] = useState('o3-2025-04-16')
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
@@ -46,8 +46,14 @@ export default function AnalysisSection() {
       const modelConfig = AI_MODELS[selectedModel as keyof typeof AI_MODELS]
       
       // 檢查積分
-      if (!isDevMode && !useCredits(modelConfig.cost)) {
-        throw new Error('積分不足')
+      if (!isDevMode) {
+        if (!userCredits || userCredits.credits < modelConfig.cost) {
+          throw new Error(`積分不足！需要 ${modelConfig.cost} 積分，目前剩餘 ${userCredits?.credits || 0} 積分`)
+        }
+        
+        if (!useCredits(modelConfig.cost, `AI 分析 - ${modelConfig.name}`)) {
+          throw new Error('積分扣除失敗')
+        }
       }
 
       console.log('開始獲取真實數據進行專業分析...')
