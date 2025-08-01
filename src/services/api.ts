@@ -235,7 +235,15 @@ export async function callOpenAI(model: string, priceData: any, newsData: string
     throw new Error('OPENAI_API_KEY not configured')
   }
 
-  const prompt = `請你扮演一位專業的國際政治與安全分析師，結合公開資料與歷史案例，評估中華人民共和國在未來三個月內對台灣發動軍事行動的可能性（以百分比形式呈現）。
+  const prompt = `請你扮演一位專業的國際政治與安全分析師，結合公開資料與歷史案例，評估中華人民共和國在未來三個月內對台灣發動軍事行動的可能性（以百分比形式呈現）。  
+
+請在分析中考慮以下面向：  
+1. 兩岸近期的軍事演習與活動（如共機繞台、海上演習等）  
+2. 中國國內的政治壓力與決策節奏（例：重要政治會議、領導人動向）  
+3. 美國及盟國在台灣周邊的軍事部署與外交互動  
+4. 經濟情勢與對外制裁／反制裁影響  
+5. 地緣政治事件（如南海、朝鮮半島局勢）對中國決策的牽動  
+6. 歷史上類似時機點（如金門炮戰、近年演習升級）之比較  
 
 ## 當前市場指標數據
 **黃金價格**: $${priceData.gold.price} USD/盎司 (變化: ${priceData.gold.change}%)
@@ -245,19 +253,21 @@ export async function callOpenAI(model: string, priceData: any, newsData: string
 ## 近期相關新聞動態
 ${newsData.map((news, index) => `${index + 1}. ${news}`).join('\n')}
 
-請先以JSON格式回覆，然後提供詳細分析報告。
+### 1. JSON 格式回覆
 
-JSON格式：
+請先以以下 JSON 結構回覆，所有欄位皆不可省略，若無資料請填「N/A」：
+
+\`\`\`json
 {
   "overall_assessment": {
-    "probability": "xx%",
-    "confidence_level": "高/中/低"
+    "probability": "xx%",           // 未來三個月內中國攻台的總體機率
+    "confidence_level": "高/中/低"  // AI 對此評估的信心水準
   },
   "indicator_analysis": [
     {
       "name": "軍事演習動態",
-      "current_status": "...",
-      "impact_score": "xx%",
+      "current_status": "...",     // 簡要描述
+      "impact_score": "xx%",       // 對風險影響佔比
       "trend": "升高/穩定/降低"
     },
     {
@@ -279,7 +289,7 @@ JSON格式：
       "trend": "升高/穩定/降低"
     },
     {
-      "name": "市場避險情緒",
+      "name": "其他地緣事件",
       "current_status": "...",
       "impact_score": "xx%",
       "trend": "升高/穩定/降低"
@@ -294,8 +304,25 @@ JSON格式：
     "因應因素 2：描述…"
   ]
 }
+\`\`\`
 
-然後提供至少1000字的詳細分析報告。`
+### 2. 最完整的分析報告（繁體中文）
+
+請在上述 JSON 之後另起一段，用最完整、最詳盡的文字形式撰寫一份分析報告，至少 **800 字**。
+報告可包含以下結構：
+
+1. **背景說明**
+2. **各指標深度解讀**
+   * 軍事演習動態
+   * 國內政治壓力
+   * 美軍部署與盟友互動
+   * 經濟與制裁情勢
+   * 其他地緣事件
+3. **風險觸發情境舉例**
+4. **可能後果**
+5. **建議對策**
+
+請以上述 Markdown 結構回覆，切勿省略任何步驟和欄位，若無資料請填「N/A」。`
 
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {

@@ -225,17 +225,41 @@ export default function AnalysisSection() {
           transition={{ duration: 0.8 }}
           className="space-y-8"
         >
+          {/* 攻台機率 - 最前面顯示 */}
+          <div className="cyber-border rounded-lg p-8 bg-gradient-to-br from-red-900/30 to-gray-800/80 backdrop-blur-sm mb-8">
+            <div className="text-center">
+              <h3 className="text-2xl font-cyber font-bold mb-2 text-red-400">⚠️ 近三個月攻台機率</h3>
+              <div className="flex items-center justify-center mb-4">
+                <div className="text-8xl font-bold text-red-400 cyber-glow animate-pulse">
+                  {analysisResult.overall_assessment.probability}
+                </div>
+              </div>
+              <p className="text-xl font-mono text-gray-300 mb-2">
+                信心水準: <span className="text-cyber-accent">{analysisResult.overall_assessment.confidence_level}</span>
+              </p>
+              <p className="text-sm text-gray-400 font-mono">
+                基於當前軍事、政治、經濟等多維度指標綜合評估
+              </p>
+            </div>
+          </div>
+
           {/* Overall Assessment */}
           <div className="cyber-border rounded-lg p-6 bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-sm">
-            <h3 className="text-3xl font-cyber font-bold mb-4 cyber-text">總體評估</h3>
-            <div className="flex items-center justify-center mb-4">
-              <div className="text-6xl font-bold text-cyber-primary cyber-glow">
-                {analysisResult.overall_assessment.probability}
+            <h3 className="text-3xl font-cyber font-bold mb-4 cyber-text">總體評估詳情</h3>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="text-center p-4 bg-gray-800/50 rounded-lg">
+                <h4 className="text-lg font-bold text-cyber-primary mb-2">攻台機率</h4>
+                <div className="text-4xl font-bold text-cyber-primary">
+                  {analysisResult.overall_assessment.probability}
+                </div>
+              </div>
+              <div className="text-center p-4 bg-gray-800/50 rounded-lg">
+                <h4 className="text-lg font-bold text-cyber-secondary mb-2">信心水準</h4>
+                <div className="text-4xl font-bold text-cyber-secondary">
+                  {analysisResult.overall_assessment.confidence_level}
+                </div>
               </div>
             </div>
-            <p className="text-center text-xl font-mono text-gray-300">
-              未來三個月內攻台機率 • 信心水準: {analysisResult.overall_assessment.confidence_level}
-            </p>
           </div>
 
           {/* Indicator Analysis */}
