@@ -1,4 +1,6 @@
 // 改進的價格服務 - 解決 CORS 問題
+import { safeLog, safeError } from '../utils/env'
+
 export interface PriceData {
   price: number
   change: number
@@ -51,7 +53,7 @@ async function fetchFromYahoo(symbol: string): Promise<{ price: number; change: 
       change: change
     }
   } catch (error) {
-    console.error(`Failed to fetch ${symbol} from Yahoo:`, error)
+    safeError(`Failed to fetch ${symbol} from Yahoo:`, error)
     throw error
   }
 }
@@ -81,7 +83,7 @@ function generateRealisticPrice(basePrice: number, symbol: string): { price: num
 
 // 主要的價格獲取函數
 export async function fetchRealPrices(): Promise<PricesResponse> {
-  console.log('Fetching real commodity prices...')
+  safeLog('Fetching real commodity prices...')
   
   let goldData: { price: number; change: number }
   let wheatData: { price: number; change: number }
@@ -90,23 +92,23 @@ export async function fetchRealPrices(): Promise<PricesResponse> {
     // 嘗試從 Yahoo Finance 獲取黃金價格
     try {
       goldData = await fetchFromYahoo('gold')
-      console.log('Gold price fetched from Yahoo Finance')
+      safeLog('Gold price fetched from Yahoo Finance')
     } catch (error) {
-      console.log('Yahoo Finance failed for gold, using realistic simulation')
+      safeLog('Yahoo Finance failed for gold, using realistic simulation')
       goldData = generateRealisticPrice(2650, 'gold') // 當前黃金價格約 $2650/oz
     }
     
     // 嘗試從 Yahoo Finance 獲取小麥價格
     try {
       wheatData = await fetchFromYahoo('wheat')
-      console.log('Wheat price fetched from Yahoo Finance')
+      safeLog('Wheat price fetched from Yahoo Finance')
     } catch (error) {
-      console.log('Yahoo Finance failed for wheat, using realistic simulation')
+      safeLog('Yahoo Finance failed for wheat, using realistic simulation')
       wheatData = generateRealisticPrice(5.50, 'wheat') // 當前小麥價格約 $5.50/bushel
     }
     
   } catch (error) {
-    console.error('All price sources failed, using simulated data:', error)
+    safeError('All price sources failed, using simulated data:', error)
     goldData = generateRealisticPrice(2650, 'gold')
     wheatData = generateRealisticPrice(5.50, 'wheat')
   }

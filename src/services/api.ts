@@ -1,8 +1,10 @@
 // 真實 API 服務
 // 導入新的價格服務
 import { fetchRealPrices as fetchPricesFromService } from './priceService'
+import { fetchRealNews as fetchNewsFromService } from './newsService'
+import { safeLog, safeError, ENV_CONFIG } from '../utils/env'
 
-const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY
+const OPENAI_API_KEY = ENV_CONFIG.OPENAI_API_KEY
 
 // AI 模型配置 - 完全按照開發計畫.md
 export const AI_MODELS = {
@@ -19,86 +21,15 @@ export async function fetchRealPrices() {
   return await fetchPricesFromService()
 }
 
-// 獲取真實新聞數據
+// 獲取真實新聞數據 - 使用改進的服務
 export async function fetchRealNews() {
-  try {
-    console.log('Fetching comprehensive news from Google News...')
-    
-    const searchQueries = [
-      '台海 軍事 演習 2024',
-      '中國 台灣 軍事 部署',
-      '美軍 台海 印太 戰略',
-      '兩岸 關係 最新 發展',
-      '台海 安全 國際 關注',
-      '共軍 繞台 軍機 活動',
-      '美台 軍售 防務 合作',
-      '南海 台海 地緣 政治'
-    ]
-    
-    let allNews: string[] = []
-    const proxyUrl = 'https://api.allorigins.win/raw?url='
-    
-    for (const query of searchQueries) {
-      try {
-        console.log(`Searching for: ${query}`)
-        
-        const newsUrl = encodeURIComponent(`https://news.google.com/search?q=${encodeURIComponent(query)}&hl=zh-TW&gl=TW&ceid=TW:zh-Hant`)
-        
-        const response = await fetch(proxyUrl + newsUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Language': 'zh-TW,zh;q=0.9,en;q=0.8',
-          }
-        })
-        
-        if (response.ok) {
-          const html = await response.text()
-          console.log(`Successfully fetched news for: ${query}`)
-          
-          const titlePatterns = [
-            /<article[^>]*>[\s\S]*?<h3[^>]*>(.*?)<\/h3>/g,
-            /<h3[^>]*class="[^"]*"[^>]*>(.*?)<\/h3>/g,
-            /<h4[^>]*>(.*?)<\/h4>/g,
-            /data-n-tid[^>]*>(.*?)<\/a>/g,
-            /<a[^>]*data-n-tid[^>]*>(.*?)<\/a>/g,
-          ]
-          
-          for (const pattern of titlePatterns) {
-            let match
-            while ((match = pattern.exec(html)) !== null && allNews.length < 50) {
-              let title = match[1].replace(/<[^>]*>/g, '').trim()
-              title = title.replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-              
-              if (title.length > 15 && 
-                  !allNews.includes(title) && 
-                  (title.includes('台') || title.includes('中國') || title.includes('美') || title.includes('軍') || title.includes('海'))) {
-                allNews.push(title)
-                console.log(`Found news: ${title}`)
-              }
-            }
-          }
-        }
-      } catch (error) {
-        console.log(`Error fetching news for query "${query}":`, error)
-        continue
-      }
-      
-      // 延遲避免被限制
-      await new Promise(resolve => setTimeout(resolve, 1000))
-    }
-    
-    return allNews.slice(0, 12)
-    
-  } catch (error) {
-    console.error('Failed to fetch news:', error)
-    throw error
-  }
+  return await fetchNewsFromService()
 }
 
 // 調用真實 OpenAI API
 export async function callOpenAI(model: string, priceData: any, newsData: string[]) {
   if (!OPENAI_API_KEY) {
+    safeError('OPENAI_API_KEY not configured')
     throw new Error('OPENAI_API_KEY not configured')
   }
 
@@ -222,7 +153,7 @@ ${newsData.map((news, index) => `${index + 1}. ${news}`).join('\n')}
     const data = await response.json()
     return data.choices[0]?.message?.content || ''
   } catch (error) {
-    console.error('OpenAI API error:', error)
+    safeError('OpenAI API error:', error)
     throw error
   }
 }
