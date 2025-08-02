@@ -1,4 +1,6 @@
 // 真實 API 服務
+// 導入新的價格服務
+import { fetchRealPrices as fetchPricesFromService } from './priceService'
 
 const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY
 
@@ -12,144 +14,9 @@ export const AI_MODELS = {
   'o4-mini-deep-research-2025-06-26': { cost: 50, name: 'O4 Mini Deep Research', apiModel: 'gpt-4' },
 }
 
-// 獲取真實價格數據
+// 獲取真實價格數據 - 使用改進的服務
 export async function fetchRealPrices() {
-  try {
-    console.log('Fetching real prices from investing.com...')
-    
-    const proxyUrl = 'https://api.allorigins.win/raw?url='
-    const goldUrl = encodeURIComponent('https://www.investing.com/commodities/gold')
-    const wheatUrl = encodeURIComponent('https://www.investing.com/commodities/us-wheat')
-    
-    const [goldResponse, wheatResponse] = await Promise.all([
-      fetch(proxyUrl + goldUrl, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        }
-      }),
-      fetch(proxyUrl + wheatUrl, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        }
-      })
-    ])
-
-    let goldPrice = '2000.00'
-    let goldChange = '0.00'
-    let wheatPrice = '600.00'
-    let wheatChange = '0.00'
-
-    // 解析黃金價格
-    if (goldResponse.ok) {
-      const goldHtml = await goldResponse.text()
-      console.log('Gold HTML received, length:', goldHtml.length)
-      
-      const pricePatterns = [
-        /data-test="instrument-price-last"[^>]*>([^<]+)</,
-        /class="text-2xl[^>]*>([^<]+)</,
-        /pid-1-last[^>]*>([^<]+)</,
-        /"last":"([^"]+)"/,
-        /\$([0-9,]+\.?[0-9]*)/
-      ]
-      
-      for (const pattern of pricePatterns) {
-        const match = goldHtml.match(pattern)
-        if (match) {
-          const extractedPrice = match[1].replace(/[^0-9.]/g, '')
-          if (extractedPrice && parseFloat(extractedPrice) > 1000) {
-            goldPrice = parseFloat(extractedPrice).toFixed(2)
-            console.log('Gold price found:', goldPrice)
-            break
-          }
-        }
-      }
-      
-      const changePatterns = [
-        /data-test="instrument-price-change"[^>]*>([^<]+)</,
-        /change[^>]*>([+-]?[0-9.]+)/,
-        /"change":"([^"]+)"/
-      ]
-      
-      for (const pattern of changePatterns) {
-        const match = goldHtml.match(pattern)
-        if (match) {
-          const extractedChange = match[1].replace(/[^0-9.-]/g, '')
-          if (extractedChange) {
-            goldChange = parseFloat(extractedChange).toFixed(2)
-            console.log('Gold change found:', goldChange)
-            break
-          }
-        }
-      }
-    }
-
-    // 解析小麥價格
-    if (wheatResponse.ok) {
-      const wheatHtml = await wheatResponse.text()
-      console.log('Wheat HTML received, length:', wheatHtml.length)
-      
-      const pricePatterns = [
-        /data-test="instrument-price-last"[^>]*>([^<]+)</,
-        /class="text-2xl[^>]*>([^<]+)</,
-        /pid-[0-9]+-last[^>]*>([^<]+)</,
-        /"last":"([^"]+)"/,
-        /\$([0-9,]+\.?[0-9]*)/
-      ]
-      
-      for (const pattern of pricePatterns) {
-        const match = wheatHtml.match(pattern)
-        if (match) {
-          const extractedPrice = match[1].replace(/[^0-9.]/g, '')
-          if (extractedPrice && parseFloat(extractedPrice) > 100) {
-            wheatPrice = parseFloat(extractedPrice).toFixed(2)
-            console.log('Wheat price found:', wheatPrice)
-            break
-          }
-        }
-      }
-      
-      const changePatterns = [
-        /data-test="instrument-price-change"[^>]*>([^<]+)</,
-        /change[^>]*>([+-]?[0-9.]+)/,
-        /"change":"([^"]+)"/
-      ]
-      
-      for (const pattern of changePatterns) {
-        const match = wheatHtml.match(pattern)
-        if (match) {
-          const extractedChange = match[1].replace(/[^0-9.-]/g, '')
-          if (extractedChange) {
-            wheatChange = parseFloat(extractedChange).toFixed(2)
-            console.log('Wheat change found:', wheatChange)
-            break
-          }
-        }
-      }
-    }
-
-    return {
-      gold: {
-        price: goldPrice,
-        change: goldChange,
-        currency: 'USD',
-        unit: '盎司',
-        lastUpdate: new Date().toISOString(),
-        source: 'investing.com'
-      },
-      wheat: {
-        price: wheatPrice,
-        change: wheatChange,
-        currency: 'USD',
-        unit: '蒲式耳',
-        lastUpdate: new Date().toISOString(),
-        source: 'investing.com'
-      }
-    }
-
-  } catch (error) {
-    console.error('Failed to fetch real prices:', error)
-    throw error
-  }
+  return await fetchPricesFromService()
 }
 
 // 獲取真實新聞數據
