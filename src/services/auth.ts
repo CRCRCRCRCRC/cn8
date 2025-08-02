@@ -121,6 +121,8 @@ export function renderGoogleSignInButton(element: HTMLElement) {
 
 // 創建 cyber 風格的 Google 登入按鈕
 function createCyberGoogleButton(element: HTMLElement) {
+  console.log('Creating cyber Google button...')
+  
   element.innerHTML = `
     <button 
       id="cyber-google-signin"
@@ -136,16 +138,88 @@ function createCyberGoogleButton(element: HTMLElement) {
     </button>
   `
   
-  const button = element.querySelector('#cyber-google-signin')
+  const button = element.querySelector('#cyber-google-signin') as HTMLButtonElement
   if (button) {
-    button.addEventListener('click', () => {
-      console.log('Cyber Google sign-in triggered')
+    console.log('Button found, adding click listener...')
+    
+    // 移除任何現有的事件監聽器
+    const newButton = button.cloneNode(true) as HTMLButtonElement
+    button.parentNode?.replaceChild(newButton, button)
+    
+    newButton.addEventListener('click', (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      
+      console.log('Cyber Google sign-in button clicked!')
+      console.log('Google available:', !!window.google)
+      console.log('Google accounts:', !!window.google?.accounts)
+      console.log('Google ID:', !!window.google?.accounts?.id)
+      
+      if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+        console.error('Google Identity Services not available')
+        alert('Google 登入服務未載入，請重新整理頁面')
+        return
+      }
+      
       try {
-        window.google.accounts.id.prompt()
+        console.log('Triggering Google prompt...')
+        window.google.accounts.id.prompt((notification: any) => {
+          console.log('Google prompt notification:', notification)
+          if (notification.isNotDisplayed()) {
+            console.log('Google prompt not displayed, trying alternative method...')
+            // 如果 prompt 無法顯示，嘗試直接觸發登入流程
+            triggerGoogleLogin()
+          }
+        })
       } catch (promptError) {
         console.error('Failed to show Google prompt:', promptError)
+        alert('Google 登入失敗，請檢查網路連接')
       }
     })
+    
+    console.log('Click listener added successfully')
+  } else {
+    console.error('Button not found after creation')
+  }
+}
+
+// 備用的 Google 登入觸發方法
+function triggerGoogleLogin() {
+  console.log('Triggering alternative Google login...')
+  
+  if (!GOOGLE_CLIENT_ID) {
+    console.error('Google Client ID not configured')
+    return
+  }
+  
+  // 創建一個隱藏的 Google 按鈕並自動點擊
+  const tempContainer = document.createElement('div')
+  tempContainer.style.position = 'absolute'
+  tempContainer.style.left = '-9999px'
+  tempContainer.style.top = '-9999px'
+  document.body.appendChild(tempContainer)
+  
+  try {
+    window.google.accounts.id.renderButton(tempContainer, {
+      theme: 'outline',
+      size: 'large',
+      text: 'signin_with'
+    })
+    
+    // 等待按鈕渲染完成後自動點擊
+    setTimeout(() => {
+      const googleButton = tempContainer.querySelector('div[role="button"]') as HTMLElement
+      if (googleButton) {
+        console.log('Auto-clicking hidden Google button...')
+        googleButton.click()
+      }
+      // 清理臨時元素
+      document.body.removeChild(tempContainer)
+    }, 100)
+    
+  } catch (error) {
+    console.error('Failed to create temporary Google button:', error)
+    document.body.removeChild(tempContainer)
   }
 }
 
@@ -172,7 +246,7 @@ declare global {
           initialize: (config: any) => void
           renderButton: (element: HTMLElement, config: any) => void
           disableAutoSelect: () => void
-          prompt: () => void
+          prompt: (callback?: (notification: any) => void) => void
         }
       }
     }
