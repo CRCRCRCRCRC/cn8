@@ -23,15 +23,25 @@ export default function LoginPage() {
     const initializeAuth = async () => {
       try {
         setIsLoading(true)
-        await initAuth()
+        setError('')
         
-        // 渲染 Google 登入按鈕
-        if (googleButtonRef.current) {
-          renderGoogleSignInButton(googleButtonRef.current)
-        }
+        console.log('Starting Google Auth initialization...')
+        await initAuth()
+        console.log('Google Auth initialized, rendering button...')
+        
+        // 等待一下確保 DOM 準備好
+        setTimeout(() => {
+          if (googleButtonRef.current) {
+            renderGoogleSignInButton(googleButtonRef.current)
+          } else {
+            console.error('Google button container not found')
+            setError('登入按鈕容器載入失敗')
+          }
+        }, 100)
+        
       } catch (error) {
         console.error('Failed to initialize auth:', error)
-        setError('無法載入 Google 登入服務')
+        setError(`Google 登入服務載入失敗: ${error.message}`)
       } finally {
         setIsLoading(false)
       }
@@ -40,20 +50,21 @@ export default function LoginPage() {
     initializeAuth()
 
     // 監聽登入成功事件
-    const handleLoginSuccess = () => {
+    const handleLoginSuccess = (event: CustomEvent) => {
+      console.log('Login success event received:', event.detail)
       navigate('/')
     }
 
     const handleLoginError = (event: CustomEvent) => {
+      console.error('Login error event received:', event.detail)
       setError('Google 登入失敗，請重試')
-      console.error('Google login error:', event.detail)
     }
 
-    window.addEventListener('googleLogin', handleLoginSuccess)
+    window.addEventListener('googleLogin', handleLoginSuccess as EventListener)
     window.addEventListener('googleLoginError', handleLoginError as EventListener)
 
     return () => {
-      window.removeEventListener('googleLogin', handleLoginSuccess)
+      window.removeEventListener('googleLogin', handleLoginSuccess as EventListener)
       window.removeEventListener('googleLoginError', handleLoginError as EventListener)
     }
   }, [initAuth, navigate])
@@ -138,30 +149,7 @@ export default function LoginPage() {
             ) : (
               <>
                 {/* Google 登入按鈕容器 */}
-                <div ref={googleButtonRef} className="w-full mb-4"></div>
-                
-                {/* 備用登入按鈕（如果 Google Identity Services 載入失敗）*/}
-                <button
-                  onClick={() => {
-                    // 手動觸發 Google 登入
-                    if (window.google) {
-                      window.google.accounts.id.prompt()
-                    } else {
-                      // 模擬登入（開發測試用）
-                      const mockUser = {
-                        id: 'test_user_' + Date.now(),
-                        name: '測試用戶',
-                        email: 'test@example.com',
-                        picture: 'https://via.placeholder.com/40'
-                      }
-                      window.dispatchEvent(new CustomEvent('googleLogin', { detail: mockUser }))
-                    }
-                  }}
-                  className="w-full bg-white text-gray-800 py-4 px-6 rounded-lg font-bold text-lg hover:bg-gray-100 transition-all duration-300 flex items-center justify-center space-x-3"
-                >
-                  <Chrome className="w-6 h-6" />
-                  <span>使用 Google 登入</span>
-                </button>
+                <div ref={googleButtonRef} className="w-full"></div>
               </>
             )}
           </motion.div>

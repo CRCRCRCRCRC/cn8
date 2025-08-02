@@ -18,46 +18,44 @@ interface GoogleAuthResponse {
 export function initGoogleAuth(): Promise<void> {
   return new Promise((resolve, reject) => {
     if (!GOOGLE_CLIENT_ID) {
+      console.error('GOOGLE_CLIENT_ID not configured')
       reject(new Error('GOOGLE_CLIENT_ID not configured'))
       return
     }
 
-    // 檢查是否已經載入
-    if (window.google) {
-      window.google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: handleGoogleResponse,
-        auto_select: false,
-        cancel_on_tap_outside: true
-      })
-      resolve()
-      return
-    }
+    console.log('Initializing Google Auth with Client ID:', GOOGLE_CLIENT_ID)
 
-    // 動態載入 Google Identity Services
-    const script = document.createElement('script')
-    script.src = 'https://accounts.google.com/gsi/client'
-    script.async = true
-    script.defer = true
-    script.onload = () => {
-      // 等待 Google 物件可用
-      const checkGoogle = () => {
-        if (window.google && window.google.accounts) {
+    // 等待 Google Identity Services 載入
+    const checkGoogle = () => {
+      if (window.google && window.google.accounts && window.google.accounts.id) {
+        try {
+          console.log('Google Identity Services detected, initializing...')
           window.google.accounts.id.initialize({
             client_id: GOOGLE_CLIENT_ID,
             callback: handleGoogleResponse,
             auto_select: false,
-            cancel_on_tap_outside: true
+            cancel_on_tap_outside: true,
+            use_fedcm_for_prompt: false
           })
+          console.log('Google Auth initialized successfully')
           resolve()
-        } else {
-          setTimeout(checkGoogle, 100)
+        } catch (error) {
+          console.error('Failed to initialize Google Auth:', error)
+          reject(error)
         }
+      } else {
+        console.log('Waiting for Google Identity Services...')
+        setTimeout(checkGoogle, 500)
       }
-      checkGoogle()
     }
-    script.onerror = () => reject(new Error('Failed to load Google Identity Services'))
-    document.head.appendChild(script)
+
+    // 開始檢查
+    checkGoogle()
+
+    // 設置超時
+    setTimeout(() => {
+      reject(new Error('Google Identity Services load timeout'))
+    }, 10000)
   })
 }
 
@@ -96,12 +94,40 @@ function parseJWT(token: string) {
 
 // 顯示 Google 登入按鈕
 export function renderGoogleSignInButton(element: HTMLElement) {
-  if (!window.google) {
-    console.warn('Google Identity Services not loaded, creating fallback button')
-    // 創建備用按鈕
+  console.log('Rendering Google Sign-In button...')
+  
+  if (!window.google || !window.google.accounts || !window.google.accounts.id) {
+    console.error('Google Identity Services not available')
+    element.innerHTML = '<div class="text-red-500 p-4">Google 登入服務載入失敗，請重新整理頁面</div>'
+    return
+  }
+
+  try {
+    console.log('Rendering official Google button...')
+    
+    // 清空容器
+    element.innerHTML = ''
+    
+    // 渲染官方 Google 按鈕
+    window.google.accounts.id.renderButton(element, {
+      theme: 'outline',
+      size: 'large',
+      text: 'signin_with',
+      shape: 'rectangular',
+      logo_alignment: 'left',
+      width: element.offsetWidth || 300,
+      height: 50
+    })
+    
+    console.log('Google button rendered successfully')
+    
+  } catch (error) {
+    console.error('Failed to render Google button:', error)
+    
+    // 如果官方按鈕渲染失敗，創建手動觸發按鈕
     element.innerHTML = `
       <button 
-        id="google-signin-fallback"
+        id="manual-google-signin"
         style="
           width: 100%;
           height: 50px;
@@ -119,8 +145,6 @@ export function renderGoogleSignInButton(element: HTMLElement) {
           cursor: pointer;
           transition: all 0.2s;
         "
-        onmouseover="this.style.backgroundColor='#f8f9fa'"
-        onmouseout="this.style.backgroundColor='white'"
       >
         <svg width="18" height="18" viewBox="0 0 24 24">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -132,42 +156,17 @@ export function renderGoogleSignInButton(element: HTMLElement) {
       </button>
     `
     
-    // 添加點擊事件
-    const button = element.querySelector('#google-signin-fallback')
+    const button = element.querySelector('#manual-google-signin')
     if (button) {
       button.addEventListener('click', () => {
-        // 如果 Google 服務仍未載入，使用模擬登入
-        if (!window.google) {
-          console.log('Using mock login for development/testing')
-          const mockUser = {
-            id: 'test_user_' + Date.now(),
-            name: '測試用戶',
-            email: 'test@example.com',
-            picture: 'https://via.placeholder.com/40'
-          }
-          window.dispatchEvent(new CustomEvent('googleLogin', { detail: mockUser }))
-        } else {
-          // 嘗試觸發 Google 登入
+        console.log('Manual Google sign-in triggered')
+        try {
           window.google.accounts.id.prompt()
+        } catch (promptError) {
+          console.error('Failed to show Google prompt:', promptError)
         }
       })
     }
-    return
-  }
-  
-  try {
-    window.google.accounts.id.renderButton(element, {
-      theme: 'outline',
-      size: 'large',
-      text: 'signin_with',
-      shape: 'rectangular',
-      logo_alignment: 'left',
-      width: '100%'
-    })
-  } catch (error) {
-    console.error('Failed to render Google button:', error)
-    // 如果渲染失敗，也使用備用按鈕
-    renderGoogleSignInButton(element)
   }
 }
 
@@ -194,6 +193,7 @@ declare global {
           initialize: (config: any) => void
           renderButton: (element: HTMLElement, config: any) => void
           disableAutoSelect: () => void
+          prompt: () => void
         }
       }
     }
