@@ -225,15 +225,7 @@ function triggerGoogleLogin() {
       <p style="margin: 0; color: #666; font-size: 14px;">請點擊下方按鈕登入</p>
     </div>
     <div id="temp-google-button"></div>
-    <button id="close-temp-login" style="
-      margin-top: 15px;
-      width: 100%;
-      padding: 8px;
-      background: #f5f5f5;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      cursor: pointer;
-    ">取消</button>
+    <button id="close-temp-login" style="margin-top: 15px; width: 100%; padding: 8px; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">取消</button>
   `
   
   document.body.appendChild(tempContainer)
