@@ -264,7 +264,6 @@ export default function DevAuthPage() {
               </div>
             </motion.div>
           )}
-          </form>
         </motion.div>
       </motion.div>
     </div>
