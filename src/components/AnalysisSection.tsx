@@ -45,14 +45,10 @@ export default function AnalysisSection() {
     try {
       const modelConfig = AI_MODELS[selectedModel as keyof typeof AI_MODELS]
       
-      // 檢查積分
+      // 檢查積分但先不扣除
       if (!isDevMode) {
         if (!userCredits || userCredits.credits < modelConfig.cost) {
           throw new Error(`積分不足！需要 ${modelConfig.cost} 積分，目前剩餘 ${userCredits?.credits || 0} 積分`)
-        }
-        
-        if (!useCredits(modelConfig.cost, `AI 分析 - ${modelConfig.name}`)) {
-          throw new Error('積分扣除失敗')
         }
       }
 
@@ -189,9 +185,17 @@ export default function AnalysisSection() {
       setAnalysisResult(analysis)
       setDetailedReport(detailedReport || '詳細報告生成中...')
 
+      // 只有在成功完成分析後才扣除積分
+      if (!isDevMode) {
+        if (!useCredits(modelConfig.cost, `AI 分析 - ${modelConfig.name}`)) {
+          console.warn('積分扣除失敗，但分析已完成')
+        }
+      }
+
     } catch (err) {
       console.error('Analysis error:', err)
       setError(err instanceof Error ? err.message : '分析過程中發生錯誤')
+      // 發生錯誤時不扣除積分
     } finally {
       setIsAnalyzing(false)
     }

@@ -1,16 +1,18 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Code, Lock, ArrowLeft, AlertTriangle, CheckCircle } from 'lucide-react'
+import { Code, Lock, ArrowLeft, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
+import { resetCredits } from '../services/credits'
 
 export default function DevAuthPage() {
   const navigate = useNavigate()
-  const { enableDevMode } = useAuth()
+  const { enableDevMode, user, userCredits } = useAuth()
   const [testCode, setTestCode] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [isResetting, setIsResetting] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,6 +33,33 @@ export default function DevAuthPage() {
       setError('驗證過程中發生錯誤')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleResetCredits = async () => {
+    if (!user) {
+      setError('請先登入才能重置積分')
+      return
+    }
+
+    setIsResetting(true)
+    setError('')
+
+    try {
+      // 模擬重置延遲
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      const newCredits = resetCredits(user.id)
+      console.log('積分已重置:', newCredits)
+      
+      // 顯示成功訊息
+      alert(`✅ 積分已恢復！\n\n當前積分: ${newCredits.credits}/${newCredits.maxCredits}\n用戶: ${user.name || user.email}`)
+      
+    } catch (err) {
+      setError('積分重置失敗，請重試')
+      console.error('Reset credits error:', err)
+    } finally {
+      setIsResetting(false)
     }
   }
 
@@ -144,7 +173,7 @@ export default function DevAuthPage() {
             <motion.button
               type="submit"
               disabled={isLoading || !testCode.trim()}
-              className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-gray-900 py-4 px-6 rounded-lg font-bold text-lg hover:from-yellow-400 hover:to-orange-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-gray-900 py-4 px-6 rounded-lg font-bold text-lg hover:from-yellow-400 hover:to-orange-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed mb-4"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               initial={{ opacity: 0, y: 20 }}
@@ -160,6 +189,81 @@ export default function DevAuthPage() {
                 '驗證測試碼'
               )}
             </motion.button>
+
+            {/* Reset Credits Button - 只有登入用戶才顯示 */}
+            {user && (
+              <motion.button
+                type="button"
+                onClick={handleResetCredits}
+                disabled={isResetting}
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white py-3 px-6 rounded-lg font-bold hover:from-green-400 hover:to-emerald-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                whileHover={{ scale: isResetting ? 1 : 1.02 }}
+                whileTap={{ scale: isResetting ? 1 : 0.98 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
+              >
+                {isResetting ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>重置中...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center space-x-2">
+                    <RefreshCw className="w-5 h-5" />
+                    <span>恢復所有積分</span>
+                  </div>
+                )}
+              </motion.button>
+            )}
+          </form>
+
+          {/* User Credits Display - 顯示當前積分狀態 */}
+          {user && userCredits && (
+            <motion.div
+              className="mt-6 p-4 bg-gradient-to-r from-blue-900/20 to-purple-900/20 rounded-lg cyber-border"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9 }}
+            >
+              <div className="text-center">
+                <p className="text-sm text-gray-400 mb-2">當前用戶積分狀態</p>
+                <div className="flex items-center justify-center space-x-2 mb-2">
+                  <div className="text-2xl font-mono text-cyber-primary">
+                    {userCredits.credits}
+                  </div>
+                  <div className="text-gray-500">/</div>
+                  <div className="text-lg font-mono text-gray-300">
+                    {userCredits.maxCredits}
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500">
+                  用戶: {user.name || user.email}
+                </p>
+                <p className="text-xs text-gray-600 mt-1">
+                  ID: {user.id.substring(0, 12)}...
+                </p>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Login Reminder */}
+          {!user && (
+            <motion.div
+              className="mt-6 p-4 bg-gradient-to-r from-orange-900/20 to-red-900/20 rounded-lg cyber-border"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9 }}
+            >
+              <div className="text-center">
+                <AlertTriangle className="w-6 h-6 text-orange-400 mx-auto mb-2" />
+                <p className="text-sm text-orange-400 mb-1">需要登入才能重置積分</p>
+                <p className="text-xs text-gray-500">
+                  請先完成 Google 登入
+                </p>
+              </div>
+            </motion.div>
+          )}
           </form>
         </motion.div>
       </motion.div>
