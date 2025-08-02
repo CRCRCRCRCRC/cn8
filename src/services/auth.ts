@@ -165,15 +165,29 @@ function createCyberGoogleButton(element: HTMLElement) {
         console.log('Triggering Google prompt...')
         window.google.accounts.id.prompt((notification: any) => {
           console.log('Google prompt notification:', notification)
-          if (notification.isNotDisplayed()) {
+          console.log('Notification methods:', Object.getOwnPropertyNames(notification))
+          
+          // 檢查是否顯示了登入提示
+          if (notification.isNotDisplayed && notification.isNotDisplayed()) {
             console.log('Google prompt not displayed, trying alternative method...')
-            // 如果 prompt 無法顯示，嘗試直接觸發登入流程
             triggerGoogleLogin()
+          } else if (notification.isSkippedMoment && notification.isSkippedMoment()) {
+            console.log('Google prompt was skipped, trying alternative method...')
+            triggerGoogleLogin()
+          } else if (notification.isDismissedMoment && notification.isDismissedMoment()) {
+            console.log('Google prompt was dismissed by user')
+          } else {
+            console.log('Google prompt should be displayed, but no login detected. Trying alternative...')
+            // 等待一下，如果沒有登入事件就使用備用方法
+            setTimeout(() => {
+              triggerGoogleLogin()
+            }, 2000)
           }
         })
       } catch (promptError) {
         console.error('Failed to show Google prompt:', promptError)
-        alert('Google 登入失敗，請檢查網路連接')
+        console.log('Falling back to alternative login method...')
+        triggerGoogleLogin()
       }
     })
     
@@ -192,34 +206,79 @@ function triggerGoogleLogin() {
     return
   }
   
-  // 創建一個隱藏的 Google 按鈕並自動點擊
+  // 方法1: 創建臨時的官方 Google 按鈕
   const tempContainer = document.createElement('div')
-  tempContainer.style.position = 'absolute'
-  tempContainer.style.left = '-9999px'
-  tempContainer.style.top = '-9999px'
+  tempContainer.style.position = 'fixed'
+  tempContainer.style.top = '50%'
+  tempContainer.style.left = '50%'
+  tempContainer.style.transform = 'translate(-50%, -50%)'
+  tempContainer.style.zIndex = '10000'
+  tempContainer.style.background = 'white'
+  tempContainer.style.padding = '20px'
+  tempContainer.style.borderRadius = '8px'
+  tempContainer.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)'
+  
+  // 添加關閉按鈕和說明
+  tempContainer.innerHTML = `
+    <div style="text-align: center; margin-bottom: 15px;">
+      <h3 style="margin: 0 0 10px 0; color: #333;">Google 登入</h3>
+      <p style="margin: 0; color: #666; font-size: 14px;">請點擊下方按鈕登入</p>
+    </div>
+    <div id="temp-google-button"></div>
+    <button id="close-temp-login" style="
+      margin-top: 15px;
+      width: 100%;
+      padding: 8px;
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+    ">取消</button>
+  `
+  
   document.body.appendChild(tempContainer)
   
+  // 添加關閉功能
+  const closeBtn = tempContainer.querySelector('#close-temp-login')
+  closeBtn?.addEventListener('click', () => {
+    document.body.removeChild(tempContainer)
+  })
+  
   try {
-    window.google.accounts.id.renderButton(tempContainer, {
+    const buttonContainer = tempContainer.querySelector('#temp-google-button') as HTMLElement
+    
+    window.google.accounts.id.renderButton(buttonContainer, {
       theme: 'outline',
       size: 'large',
-      text: 'signin_with'
+      text: 'signin_with',
+      width: 250
     })
     
-    // 等待按鈕渲染完成後自動點擊
-    setTimeout(() => {
-      const googleButton = tempContainer.querySelector('div[role="button"]') as HTMLElement
-      if (googleButton) {
-        console.log('Auto-clicking hidden Google button...')
-        googleButton.click()
+    console.log('Temporary Google button created and displayed')
+    
+    // 監聽登入成功事件，成功後自動關閉
+    const handleLoginSuccess = () => {
+      if (document.body.contains(tempContainer)) {
+        document.body.removeChild(tempContainer)
       }
-      // 清理臨時元素
-      document.body.removeChild(tempContainer)
-    }, 100)
+      window.removeEventListener('googleLogin', handleLoginSuccess)
+    }
+    
+    window.addEventListener('googleLogin', handleLoginSuccess)
+    
+    // 5秒後自動關閉（如果用戶沒有操作）
+    setTimeout(() => {
+      if (document.body.contains(tempContainer)) {
+        document.body.removeChild(tempContainer)
+      }
+      window.removeEventListener('googleLogin', handleLoginSuccess)
+    }, 30000)
     
   } catch (error) {
     console.error('Failed to create temporary Google button:', error)
-    document.body.removeChild(tempContainer)
+    if (document.body.contains(tempContainer)) {
+      document.body.removeChild(tempContainer)
+    }
   }
 }
 
