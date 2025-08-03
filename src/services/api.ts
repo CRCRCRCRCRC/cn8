@@ -26,12 +26,16 @@ export async function fetchRealNews() {
   return await fetchNewsFromService()
 }
 
-// 調用真實 OpenAI API
+// 調用真實 AI API - 使用用戶選擇的模型
 export async function callOpenAI(model: string, priceData: any, newsData: string[]) {
   if (!OPENAI_API_KEY) {
-    safeError('OPENAI_API_KEY not configured')
-    throw new Error('OPENAI_API_KEY not configured')
+    safeError('AI API KEY not configured')
+    throw new Error('AI API KEY not configured')
   }
+  
+  safeLog(`使用模型: ${model} 進行分析`)
+  safeLog(`價格數據:`, priceData)
+  safeLog(`新聞數據: ${newsData.length} 條`)
 
   const prompt = `請你扮演一位專業的國際政治與安全分析師，結合公開資料與歷史案例，評估中華人民共和國在未來三個月內對台灣發動軍事行動的可能性（以百分比形式呈現）。  
 
@@ -43,12 +47,12 @@ export async function callOpenAI(model: string, priceData: any, newsData: string
 5. 地緣政治事件（如南海、朝鮮半島局勢）對中國決策的牽動  
 6. 歷史上類似時機點（如金門炮戰、近年演習升級）之比較  
 
-## 當前市場指標數據
+## 當前市場指標數據 (2025年8月3日)
 **黃金價格**: $${priceData.gold.price} USD/盎司 (變化: ${priceData.gold.change}%)
 **小麥價格**: $${priceData.wheat.price} USD/蒲式耳 (變化: ${priceData.wheat.change}%)
 *數據來源: ${priceData.gold.source}, 更新時間: ${new Date(priceData.gold.lastUpdate).toLocaleString('zh-TW')}*
 
-## 近期相關新聞動態
+## 2025年最新相關新聞動態
 ${newsData.map((news, index) => `${index + 1}. ${news}`).join('\n')}
 
 ### 1. JSON 格式回覆
@@ -130,7 +134,7 @@ ${newsData.map((news, index) => `${index + 1}. ${news}`).join('\n')}
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: AI_MODELS[model as keyof typeof AI_MODELS]?.apiModel || 'gpt-4',
+        model: model, // 使用用戶選擇的確切模型名稱
         messages: [
           {
             role: 'system',
@@ -141,7 +145,7 @@ ${newsData.map((news, index) => `${index + 1}. ${news}`).join('\n')}
             content: prompt
           }
         ],
-        max_tokens: 4000,
+        max_tokens: 4000, // 足夠的 token 數量獲得詳細分析
         temperature: 0.7,
       }),
     })
