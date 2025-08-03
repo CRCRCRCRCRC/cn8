@@ -26,14 +26,15 @@ export async function fetchRealNews() {
   return await fetchNewsFromService()
 }
 
-// 調用真實 AI API - 使用用戶選擇的模型
+// 調用真實 AI API - 嚴格按照用戶選擇的模型
 export async function callOpenAI(model: string, priceData: any, newsData: string[]) {
   if (!OPENAI_API_KEY) {
     safeError('AI API KEY not configured')
     throw new Error('AI API KEY not configured')
   }
   
-  safeLog(`使用模型: ${model} 進行分析`)
+  safeLog(`嚴格使用用戶選擇的模型: ${model}`)
+  safeLog(`絕不擅自更改模型名稱`)
   safeLog(`價格數據:`, priceData)
   safeLog(`新聞數據: ${newsData.length} 條`)
 
@@ -134,7 +135,7 @@ ${newsData.map((news, index) => `${index + 1}. ${news}`).join('\n')}
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini', // 暫時使用穩定的模型，避免 404 錯誤
+        model: model, // 完全按照用戶選擇的模型執行
         messages: [
           {
             role: 'system',
