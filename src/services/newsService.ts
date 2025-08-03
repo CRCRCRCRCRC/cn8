@@ -121,3 +121,4 @@ async function fetchFromGoogleNews(): Promise<string[]> {
   
   return allNews.slice(0, 12)
 }
+}
