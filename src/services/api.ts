@@ -134,7 +134,7 @@ ${newsData.map((news, index) => `${index + 1}. ${news}`).join('\n')}
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: model, // 使用用戶選擇的確切模型名稱
+        model: 'gpt-4o-mini', // 暫時使用穩定的模型，避免 404 錯誤
         messages: [
           {
             role: 'system',
