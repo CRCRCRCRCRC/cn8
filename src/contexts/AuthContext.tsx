@@ -86,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(userData)
     localStorage.setItem('user', JSON.stringify(userData))
     
-    // 載入用戶積分
+    // 載入用戶積分（不重置，保持現有積分）
     const credits = getUserCredits(userData.id)
     setUserCredits(credits)
   }

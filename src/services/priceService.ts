@@ -17,45 +17,78 @@ export interface PricesResponse {
 
 // 使用多個備用數據源
 const PRICE_SOURCES = {
-  // 使用 Yahoo Finance API (無 CORS 限制)
+  // 使用多個 CORS 代理服務
+  proxies: [
+    'https://api.allorigins.win/raw?url=',
+    'https://cors-anywhere.herokuapp.com/',
+    'https://api.codetabs.com/v1/proxy?quest='
+  ],
   yahoo: {
     gold: 'https://query1.finance.yahoo.com/v8/finance/chart/GC=F',
     wheat: 'https://query1.finance.yahoo.com/v8/finance/chart/ZW=F'
   },
-  // 備用：使用 Alpha Vantage (需要 API key，但有免費額度)
-  alphavantage: {
-    apiKey: 'demo', // 在生產環境中應該使用真實 API key
-    gold: 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=XAUUSD&apikey=',
-    wheat: 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=WEAT&apikey='
+  // 備用：直接使用金融數據 API
+  finnhub: {
+    gold: 'https://finnhub.io/api/v1/quote?symbol=XAUUSD&token=demo',
+    wheat: 'https://finnhub.io/api/v1/quote?symbol=WEAT&token=demo'
   }
 }
 
-// 從 Yahoo Finance 獲取價格
+// 從多個代理嘗試獲取 Yahoo Finance 數據
 async function fetchFromYahoo(symbol: string): Promise<{ price: number; change: number }> {
-  try {
-    const url = symbol === 'gold' ? PRICE_SOURCES.yahoo.gold : PRICE_SOURCES.yahoo.wheat
-    const response = await fetch(url)
-    
-    if (!response.ok) {
-      throw new Error(`Yahoo Finance API error: ${response.status}`)
+  const baseUrl = symbol === 'gold' ? PRICE_SOURCES.yahoo.gold : PRICE_SOURCES.yahoo.wheat
+  
+  // 嘗試多個代理服務
+  for (const proxy of PRICE_SOURCES.proxies) {
+    try {
+      safeLog(`嘗試代理: ${proxy}`)
+      
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 5000)
+      
+      const url = proxy + encodeURIComponent(baseUrl)
+      const response = await fetch(url, {
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept': 'application/json'
+        }
+      })
+      
+      clearTimeout(timeoutId)
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+      
+      const data = await response.json()
+      
+      // 檢查數據結構
+      if (!data.chart || !data.chart.result || !data.chart.result[0]) {
+        throw new Error('Invalid response structure')
+      }
+      
+      const result = data.chart.result[0]
+      const meta = result.meta
+      
+      const currentPrice = meta.regularMarketPrice || meta.previousClose
+      const previousClose = meta.previousClose
+      const change = currentPrice - previousClose
+      
+      safeLog(`${symbol} 價格獲取成功: $${currentPrice}`)
+      
+      return {
+        price: currentPrice,
+        change: change
+      }
+      
+    } catch (error) {
+      safeError(`代理 ${proxy} 失敗:`, error)
+      continue
     }
-    
-    const data = await response.json()
-    const result = data.chart.result[0]
-    const meta = result.meta
-    
-    const currentPrice = meta.regularMarketPrice || meta.previousClose
-    const previousClose = meta.previousClose
-    const change = currentPrice - previousClose
-    
-    return {
-      price: currentPrice,
-      change: change
-    }
-  } catch (error) {
-    safeError(`Failed to fetch ${symbol} from Yahoo:`, error)
-    throw error
   }
+  
+  throw new Error(`所有代理都失敗`)
 }
 
 // 模擬真實價格數據（當所有 API 都失敗時的備用方案）

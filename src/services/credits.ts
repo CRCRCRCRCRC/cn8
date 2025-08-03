@@ -12,7 +12,8 @@ const MONTHLY_CREDITS = 1000
 
 // 獲取用戶積分
 export function getUserCredits(userId: string): UserCredits {
-  const stored = localStorage.getItem(CREDITS_STORAGE_KEY)
+  const storageKey = `${CREDITS_STORAGE_KEY}_${userId}` // 每個用戶獨立的積分記錄
+  const stored = localStorage.getItem(storageKey)
   const currentMonth = getCurrentMonth()
   
   if (stored) {
@@ -22,9 +23,21 @@ export function getUserCredits(userId: string): UserCredits {
     if (data.userId === userId && data.lastReset === currentMonth) {
       return data
     }
+    
+    // 如果是新月份，重置積分
+    if (data.userId === userId && data.lastReset !== currentMonth) {
+      const resetCredits: UserCredits = {
+        credits: MONTHLY_CREDITS,
+        maxCredits: MONTHLY_CREDITS,
+        lastReset: currentMonth,
+        userId: userId
+      }
+      localStorage.setItem(storageKey, JSON.stringify(resetCredits))
+      return resetCredits
+    }
   }
   
-  // 創建新的積分記錄或重置
+  // 創建新用戶的積分記錄
   const newCredits: UserCredits = {
     credits: MONTHLY_CREDITS,
     maxCredits: MONTHLY_CREDITS,
@@ -32,17 +45,18 @@ export function getUserCredits(userId: string): UserCredits {
     userId: userId
   }
   
-  localStorage.setItem(CREDITS_STORAGE_KEY, JSON.stringify(newCredits))
+  localStorage.setItem(storageKey, JSON.stringify(newCredits))
   return newCredits
 }
 
 // 使用積分
 export function useCredits(userId: string, amount: number): boolean {
+  const storageKey = `${CREDITS_STORAGE_KEY}_${userId}`
   const userCredits = getUserCredits(userId)
   
   if (userCredits.credits >= amount) {
     userCredits.credits -= amount
-    localStorage.setItem(CREDITS_STORAGE_KEY, JSON.stringify(userCredits))
+    localStorage.setItem(storageKey, JSON.stringify(userCredits))
     
     // 觸發積分更新事件
     window.dispatchEvent(new CustomEvent('creditsUpdated', { 
