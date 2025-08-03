@@ -162,11 +162,24 @@ function createCyberGoogleButton(element: HTMLElement) {
       }
       
       try {
-        console.log('直接觸發 Google 登入...')
-        // 直接觸發登入，不使用 prompt
-        triggerGoogleLogin()
+        console.log('嘗試 Google prompt...')
+        window.google.accounts.id.prompt((notification: any) => {
+          console.log('Google prompt notification:', notification)
+          
+          // 如果 prompt 無法顯示，自動點擊隱藏按鈕
+          if (notification.isNotDisplayed && notification.isNotDisplayed()) {
+            console.log('Prompt 未顯示，使用自動點擊方式...')
+            triggerGoogleLogin()
+          } else if (notification.isSkippedMoment && notification.isSkippedMoment()) {
+            console.log('Prompt 被跳過，使用自動點擊方式...')
+            triggerGoogleLogin()
+          } else if (notification.isDismissedMoment && notification.isDismissedMoment()) {
+            console.log('用戶關閉了 prompt')
+          }
+        })
       } catch (promptError) {
-        console.error('Failed to trigger Google login:', promptError)
+        console.error('Prompt 失敗，使用自動點擊方式:', promptError)
+        triggerGoogleLogin()
       }
     })
     
@@ -178,25 +191,53 @@ function createCyberGoogleButton(element: HTMLElement) {
 
 // 直接觸發 Google 登入
 function triggerGoogleLogin() {
-  console.log('直接觸發 Google 登入...')
+  console.log('觸發 Google 登入...')
   
   if (!GOOGLE_CLIENT_ID) {
     console.error('Google Client ID not configured')
     return
   }
   
-  // 構建 Google OAuth URL
-  const googleAuthUrl = new URL('https://accounts.google.com/oauth/authorize')
-  googleAuthUrl.searchParams.set('client_id', GOOGLE_CLIENT_ID)
-  googleAuthUrl.searchParams.set('redirect_uri', window.location.origin)
-  googleAuthUrl.searchParams.set('response_type', 'id_token')
-  googleAuthUrl.searchParams.set('scope', 'openid email profile')
-  googleAuthUrl.searchParams.set('nonce', Math.random().toString(36))
+  // 創建一個隱藏的官方 Google 按鈕並自動點擊
+  const tempContainer = document.createElement('div')
+  tempContainer.style.position = 'absolute'
+  tempContainer.style.left = '-9999px'
+  tempContainer.style.top = '-9999px'
+  tempContainer.style.visibility = 'hidden'
+  document.body.appendChild(tempContainer)
   
-  console.log('跳轉到 Google 登入頁面...')
-  
-  // 直接跳轉到 Google 登入頁面
-  window.location.href = googleAuthUrl.toString()
+  try {
+    // 渲染官方 Google 按鈕
+    window.google.accounts.id.renderButton(tempContainer, {
+      theme: 'outline',
+      size: 'large',
+      text: 'signin_with'
+    })
+    
+    // 等待按鈕渲染完成後自動點擊
+    setTimeout(() => {
+      const googleButton = tempContainer.querySelector('div[role="button"]') as HTMLElement
+      if (googleButton) {
+        console.log('自動點擊 Google 登入按鈕...')
+        googleButton.click()
+      } else {
+        console.error('找不到 Google 登入按鈕')
+      }
+      
+      // 清理臨時元素
+      setTimeout(() => {
+        if (document.body.contains(tempContainer)) {
+          document.body.removeChild(tempContainer)
+        }
+      }, 1000)
+    }, 200)
+    
+  } catch (error) {
+    console.error('Failed to create Google button:', error)
+    if (document.body.contains(tempContainer)) {
+      document.body.removeChild(tempContainer)
+    }
+  }
 }
 
 // 登出
