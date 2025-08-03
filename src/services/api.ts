@@ -8,12 +8,12 @@ const OPENAI_API_KEY = ENV_CONFIG.OPENAI_API_KEY
 
 // AI 模型配置 - 完全按照開發計畫.md
 export const AI_MODELS = {
-  'gpt-4.1-nano-2025-04-14': { cost: 2.5, name: 'GPT-4.1 Nano', apiModel: 'gpt-4' },
-  'o4-mini-2025-04-16': { cost: 27.5, name: 'O4 Mini', apiModel: 'gpt-4' },
-  'o3-2025-04-16': { cost: 50, name: 'O3', apiModel: 'gpt-4' },
-  'o3-pro-2025-06-10': { cost: 500, name: 'O3 Pro', apiModel: 'gpt-4' },
-  'o3-deep-research-2025-06-26': { cost: 250, name: 'O3 Deep Research', apiModel: 'gpt-4' },
-  'o4-mini-deep-research-2025-06-26': { cost: 50, name: 'O4 Mini Deep Research', apiModel: 'gpt-4' },
+  'gpt-4.1-nano-2025-04-14': { cost: 2.5, name: 'GPT-4.1 Nano', apiModel: 'gpt-4.1-nano-2025-04-14' },
+  'o4-mini-2025-04-16': { cost: 27.5, name: 'O4 Mini', apiModel: 'o4-mini-2025-04-16' },
+  'o3-2025-04-16': { cost: 50, name: 'O3', apiModel: 'o3-2025-04-16' },
+  'o3-pro-2025-06-10': { cost: 500, name: 'O3 Pro', apiModel: 'o3-pro-2025-06-10' },
+  'o3-deep-research-2025-06-26': { cost: 250, name: 'O3 Deep Research', apiModel: 'o3-deep-research-2025-06-26' },
+  'o4-mini-deep-research-2025-06-26': { cost: 50, name: 'O4 Mini Deep Research', apiModel: 'o4-mini-deep-research-2025-06-26' },
 }
 
 // 獲取真實價格數據 - 使用改進的服務
