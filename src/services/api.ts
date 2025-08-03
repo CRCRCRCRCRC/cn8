@@ -27,13 +27,16 @@ export async function fetchRealNews() {
 }
 
 // 調用真實 AI API - 嚴格按照用戶選擇的模型
-export async function callOpenAI(model: string, priceData: any, newsData: string[]) {
+export async function callOpenAI(modelKey: string, priceData: any, newsData: string[]) {
+  // 根據使用者選擇的模型鍵取得對應的 OpenAI 模型 ID
+  const modelConfig = AI_MODELS[modelKey as keyof typeof AI_MODELS]
+  const apiModel = modelConfig ? modelConfig.apiModel : modelKey
   if (!OPENAI_API_KEY) {
     safeError('AI API KEY not configured')
     throw new Error('AI API KEY not configured')
   }
   
-  safeLog(`嚴格使用用戶選擇的模型: ${model}`)
+  safeLog(`嚴格使用用戶選擇的模型鍵: ${modelKey}，對應 OpenAI 模型 ID: ${apiModel}`)
   safeLog(`絕不擅自更改模型名稱`)
   safeLog(`價格數據:`, priceData)
   safeLog(`新聞數據: ${newsData.length} 條`)
@@ -135,7 +138,7 @@ ${newsData.map((news, index) => `${index + 1}. ${news}`).join('\n')}
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: model, // 完全按照用戶選擇的模型執行
+        model: apiModel, // 使用映射後的 OpenAI 模型 ID
         messages: [
           {
             role: 'system',
