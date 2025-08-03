@@ -162,24 +162,11 @@ function createCyberGoogleButton(element: HTMLElement) {
       }
       
       try {
-        console.log('嘗試 Google prompt...')
-        window.google.accounts.id.prompt((notification: any) => {
-          console.log('Google prompt notification:', notification)
-          
-          // 如果 prompt 無法顯示，自動點擊隱藏按鈕
-          if (notification.isNotDisplayed && notification.isNotDisplayed()) {
-            console.log('Prompt 未顯示，使用自動點擊方式...')
-            triggerGoogleLogin()
-          } else if (notification.isSkippedMoment && notification.isSkippedMoment()) {
-            console.log('Prompt 被跳過，使用自動點擊方式...')
-            triggerGoogleLogin()
-          } else if (notification.isDismissedMoment && notification.isDismissedMoment()) {
-            console.log('用戶關閉了 prompt')
-          }
-        })
-      } catch (promptError) {
-        console.error('Prompt 失敗，使用自動點擊方式:', promptError)
+        console.log('觸發 Google 登入...')
+        // 直接使用自動點擊方式，簡化流程
         triggerGoogleLogin()
+      } catch (error) {
+        console.error('Google 登入失敗:', error)
       }
     })
     

@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Code, Lock, ArrowLeft, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
-import { resetCredits } from '../services/credits'
+import { resetAllUsersCredits } from '../services/credits'
 
 export default function DevAuthPage() {
   const navigate = useNavigate()
@@ -37,11 +37,6 @@ export default function DevAuthPage() {
   }
 
   const handleResetCredits = async () => {
-    if (!user) {
-      setError('請先登入才能重置積分')
-      return
-    }
-
     setIsResetting(true)
     setError('')
 
@@ -49,15 +44,16 @@ export default function DevAuthPage() {
       // 模擬重置延遲
       await new Promise(resolve => setTimeout(resolve, 500))
       
-      const newCredits = resetCredits(user.id)
-      console.log('積分已重置:', newCredits)
+      // 重置所有用戶的積分
+      const resetCount = resetAllUsersCredits()
+      console.log('所有用戶積分已重置:', resetCount)
       
       // 顯示成功訊息
-      alert(`✅ 積分已恢復！\n\n當前積分: ${newCredits.credits}/${newCredits.maxCredits}\n用戶: ${user.name || user.email}`)
+      alert(`✅ 所有用戶積分已恢復！\n\n重置了 ${resetCount} 個用戶的積分\n每個用戶現在都有 1000/1000 積分`)
       
     } catch (err) {
       setError('積分重置失敗，請重試')
-      console.error('Reset credits error:', err)
+      console.error('Reset all credits error:', err)
     } finally {
       setIsResetting(false)
     }
@@ -190,32 +186,30 @@ export default function DevAuthPage() {
               )}
             </motion.button>
 
-            {/* Reset Credits Button - 只有登入用戶才顯示 */}
-            {user && (
-              <motion.button
-                type="button"
-                onClick={handleResetCredits}
-                disabled={isResetting}
-                className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white py-3 px-6 rounded-lg font-bold hover:from-green-400 hover:to-emerald-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                whileHover={{ scale: isResetting ? 1 : 1.02 }}
-                whileTap={{ scale: isResetting ? 1 : 0.98 }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
-              >
-                {isResetting ? (
-                  <div className="flex items-center justify-center space-x-2">
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>重置中...</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center space-x-2">
-                    <RefreshCw className="w-5 h-5" />
-                    <span>恢復所有積分</span>
-                  </div>
-                )}
-              </motion.button>
-            )}
+            {/* Reset All Users Credits Button - 開發者專用 */}
+            <motion.button
+              type="button"
+              onClick={handleResetCredits}
+              disabled={isResetting}
+              className="w-full bg-gradient-to-r from-red-500 to-pink-500 text-white py-3 px-6 rounded-lg font-bold hover:from-red-400 hover:to-pink-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              whileHover={{ scale: isResetting ? 1 : 1.02 }}
+              whileTap={{ scale: isResetting ? 1 : 0.98 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+            >
+              {isResetting ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>重置中...</span>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center space-x-2">
+                  <RefreshCw className="w-5 h-5" />
+                  <span>重置所有用戶積分</span>
+                </div>
+              )}
+            </motion.button>
           </form>
 
           {/* User Credits Display - 顯示當前積分狀態 */}

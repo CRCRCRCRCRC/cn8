@@ -128,3 +128,43 @@ export function logCreditUsage(userId: string, amount: number, description: stri
   
   localStorage.setItem(historyKey, JSON.stringify(history))
 }
+
+// 重置所有用戶的積分（開發者專用）
+export function resetAllUsersCredits(): number {
+  let resetCount = 0
+  const currentMonth = getCurrentMonth()
+  
+  // 遍歷所有 localStorage 項目，找到積分相關的
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i)
+    if (key && key.startsWith(CREDITS_STORAGE_KEY + '_')) {
+      try {
+        const stored = localStorage.getItem(key)
+        if (stored) {
+          const data: UserCredits = JSON.parse(stored)
+          
+          // 重置積分
+          const resetCredits: UserCredits = {
+            credits: MONTHLY_CREDITS,
+            maxCredits: MONTHLY_CREDITS,
+            lastReset: currentMonth,
+            userId: data.userId
+          }
+          
+          localStorage.setItem(key, JSON.stringify(resetCredits))
+          resetCount++
+        }
+      } catch (error) {
+        console.error('Failed to reset credits for key:', key, error)
+      }
+    }
+  }
+  
+  // 觸發積分更新事件
+  window.dispatchEvent(new CustomEvent('creditsUpdated', { 
+    detail: { credits: MONTHLY_CREDITS, maxCredits: MONTHLY_CREDITS }
+  }))
+  
+  console.log(`重置了 ${resetCount} 個用戶的積分`)
+  return resetCount
+}

@@ -51,27 +51,37 @@ async function fetchFromGoogleNews(): Promise<string[]> {
   ]
   
   let allNews: string[] = []
-  const proxyUrl = 'https://api.allorigins.win/raw?url='
+  // 使用多個代理服務
+  const proxyServices = [
+    'https://api.codetabs.com/v1/proxy?quest=',
+    'https://cors-anywhere.herokuapp.com/',
+    'https://api.allorigins.win/raw?url='
+  ]
   
-  for (const query of searchQueries.slice(0, 3)) { // 限制查詢數量避免超時
-    try {
-      safeLog(`搜索關鍵字: ${query}`)
+  for (const query of searchQueries.slice(0, 2)) { // 只取前2個查詢避免超時
+    let success = false
+    
+    // 嘗試多個代理服務
+    for (const proxyUrl of proxyServices) {
+      if (success) break
       
-      const newsUrl = encodeURIComponent(`https://news.google.com/search?q=${encodeURIComponent(query)}&hl=zh-TW&gl=TW&ceid=TW:zh-Hant`)
-      
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 5000) // 5秒超時
-      
-      const response = await fetch(proxyUrl + newsUrl, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-          'Accept-Language': 'zh-TW,zh;q=0.9,en;q=0.8',
-        },
-        signal: controller.signal
-      })
-      
-      clearTimeout(timeoutId)
+      try {
+        safeLog(`搜索關鍵字: ${query} 使用代理: ${proxyUrl}`)
+        
+        const newsUrl = encodeURIComponent(`https://news.google.com/search?q=${encodeURIComponent(query)}&hl=zh-TW&gl=TW&ceid=TW:zh-Hant`)
+        
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 3000) // 3秒超時
+        
+        const response = await fetch(proxyUrl + newsUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          },
+          signal: controller.signal
+        })
+        
+        clearTimeout(timeoutId)
       
       if (response.ok) {
         const html = await response.text()
