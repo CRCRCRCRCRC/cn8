@@ -159,7 +159,7 @@ ${newsData.map((news, index) => `${index + 1}. ${news}`).join('\n')}
       { role: 'user', content: prompt },
     ]
     const requestBody = endpoint.includes('/responses')
-      ? { model: apiModel, instructions: systemInstruction, input: prompt }
+      ? { model: apiModel, instructions: systemInstruction, input: prompt, stream: false }
       : { model: apiModel, max_tokens: 4000, temperature: 0.7, messages: chatMessages }
     
     safeLog('請求體:', JSON.stringify(requestBody, null, 2))
@@ -181,9 +181,10 @@ ${newsData.map((news, index) => `${index + 1}. ${news}`).join('\n')}
 
     const data = await response.json()
     console.log('OpenAI API response data:', JSON.stringify(data, null, 2));
+    const messageOutput = data.output?.find((item: any) => item.type === 'message');
     const resultContent = endpoint.includes('/responses')
-      ? (data.choices?.[0]?.message?.content || data.choices?.[0]?.text || data.choices?.[0]?.content || '')
-      : (data.choices?.[0]?.message?.content || '')
+      ? (messageOutput?.content?.[0]?.text || '')
+      : (data.choices?.[0]?.message?.content || '');
     return resultContent
   } catch (error) {
     safeError('OpenAI API error:', error)
