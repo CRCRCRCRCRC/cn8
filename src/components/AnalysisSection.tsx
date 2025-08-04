@@ -83,8 +83,7 @@ export default function AnalysisSection() {
       console.log('AI Response:', aiResponse)
       
       // 更強健的 JSON 提取
-      let jsonStr = ''
-      let analysis: AnalysisResult
+
       
       let jsonStr = ''
       let analysis: AnalysisResult
