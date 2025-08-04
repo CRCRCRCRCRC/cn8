@@ -86,44 +86,38 @@ export default function AnalysisSection() {
       let jsonStr = ''
       let analysis: AnalysisResult
       
+      let jsonStr = ''
+      let analysis: AnalysisResult
+
       try {
-        // 方法1: 尋找完整的 JSON 區塊
-        const jsonStart = aiResponse.indexOf('```json')
-        const jsonEnd = aiResponse.indexOf('```', jsonStart + 7)
-        
-        if (jsonStart !== -1 && jsonEnd !== -1) {
-          jsonStr = aiResponse.substring(jsonStart + 7, jsonEnd).trim()
+        // 優先嘗試從 markdown 區塊提取 JSON
+        const codeBlockMatch = aiResponse.match(/```json\s*([\s\S]*?)\s*```/);
+        if (codeBlockMatch && codeBlockMatch[1]) {
+          jsonStr = codeBlockMatch[1];
         } else {
-          // 方法2: 尋找第一個 { 到最後一個 } 的完整 JSON
-          const firstBrace = aiResponse.indexOf('{')
-          const lastBrace = aiResponse.lastIndexOf('}')
-          
-          if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-            jsonStr = aiResponse.substring(firstBrace, lastBrace + 1)
+          // 如果沒有 markdown，則尋找第一個 '{' 到最後一個 '}' 的內容
+          const firstBrace = aiResponse.indexOf('{');
+          const lastBrace = aiResponse.lastIndexOf('}');
+          if (firstBrace !== -1 && lastBrace > firstBrace) {
+            jsonStr = aiResponse.substring(firstBrace, lastBrace + 1);
           } else {
-            throw new Error('無法找到有效的 JSON 格式')
+            // 如果上述方法都失敗，直接使用原始回應，讓 parse 決定
+            jsonStr = aiResponse;
           }
         }
-        
-        console.log('Extracted JSON:', jsonStr)
-        
-        // 清理 JSON 字符串
-        jsonStr = jsonStr
-          .replace(/\/\/.*$/gm, '') // 移除註釋
-          .replace(/,\s*}/g, '}')   // 移除尾隨逗號
-          .replace(/,\s*]/g, ']')   // 移除陣列尾隨逗號
-        
-        analysis = JSON.parse(jsonStr)
-        
+
+        analysis = JSON.parse(jsonStr);
+
         // 驗證必要欄位
         if (!analysis.overall_assessment || !analysis.indicator_analysis) {
-          throw new Error('JSON 結構不完整')
+          throw new Error('JSON 結構不完整');
         }
-        
+
       } catch (parseError) {
-        console.error('JSON 解析錯誤:', parseError)
-        console.error('原始 JSON 字符串:', jsonStr)
-        
+        console.error('JSON 解析錯誤:', parseError);
+        console.error('用於解析的原始字串:', jsonStr); // Log the string we tried to parse
+        console.error('完整的 AI 原始回應:', aiResponse); // Log the original full response
+
         // 使用備用分析結果
         analysis = {
           overall_assessment: {

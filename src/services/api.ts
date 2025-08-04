@@ -153,7 +153,7 @@ ${newsData.map((news, index) => `${index + 1}. ${news}`).join('\n')}
       max_tokens: 4000,
       temperature: 0.7,
     }
-    const systemInstruction = '你是一位專業的國際政治與安全分析師，專精於台海情勢分析。'
+    const systemInstruction = '你是一位專業的國際政治與安全分析師，專精於台海情勢分析。你的任務是根據提供的新聞和數據，生成一份結構化的 JSON 格式分析報告。請嚴格遵循指定的 JSON 結構，不要在回覆中包含任何非 JSON 內容、註解或 markdown 標記 (例如 ```json)。你的回覆必須是一個可以直接被程式解析的 JSON 物件。'
     const chatMessages = [
       { role: 'system', content: systemInstruction },
       { role: 'user', content: prompt },
@@ -181,8 +181,8 @@ ${newsData.map((news, index) => `${index + 1}. ${news}`).join('\n')}
 
     const data = await response.json()
     const resultContent = endpoint.includes('/responses')
-      ? data.choices?.[0]?.text || ''
-      : data.choices?.[0]?.message?.content || ''
+      ? (data.choices?.[0]?.message?.content || data.choices?.[0]?.text || data.choices?.[0]?.content || '')
+      : (data.choices?.[0]?.message?.content || '')
     return resultContent
   } catch (error) {
     safeError('OpenAI API error:', error)
