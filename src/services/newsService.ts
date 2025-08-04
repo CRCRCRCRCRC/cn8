@@ -22,24 +22,35 @@ const FALLBACK_NEWS = FALLBACK_NEWS_2025
 
 // 獲取新聞數據的主要函數
 export async function fetchRealNews(): Promise<string[]> {
-  safeLog('開始獲取 2025 年最新新聞數據...')
+  safeLog('開始獲取最新新聞數據...')
+  try {
+    const news = await fetchFromGoogleNews()
+    if (news.length > 0) {
+      safeLog(`成功從 Google News 獲取 ${news.length} 條新聞`)
+      return news
+    }
+    safeLog('從 Google News 未獲取到新聞，將使用備用數據')
+  } catch (error) {
+    safeError('從 Google News 獲取新聞失敗:', error)
+    safeLog('將使用備用數據')
+  }
   
-  // 由於 CORS 限制嚴重，直接使用高質量的 2025 年備用新聞
-  safeLog('使用精心策劃的 2025 年新聞數據（避免 CORS 問題）')
+  // 如果 API 失敗或未返回新聞，則使用備用數據
+  safeLog('使用精心策劃的 2025 年新聞數據作為備用')
   return FALLBACK_NEWS_2025.slice(0, 12)
 }
 
 // 從 Google News 獲取新聞
 async function fetchFromGoogleNews(): Promise<string[]> {
   const searchQueries = [
-    '台海 軍事 演習 2025',
-    '中國 台灣 軍事 部署 2025',
-    '美軍 台海 印太 戰略 2025',
-    '兩岸 關係 最新 發展 2025',
-    '台海 安全 國際 關注 2025',
-    '共軍 繞台 軍機 活動 2025',
-    '美台 軍售 防務 合作 2025',
-    '南海 台海 地緣 政治 2025'
+    '台海軍事演習',
+    '中國台灣軍事部署',
+    '美軍台海印太戰略',
+    '兩岸關係最新發展',
+    '台海安全國際關注',
+    '共軍繞台軍機活動',
+    '美台軍售防務合作',
+    '南海台海地緣政治'
   ]
   
   let allNews: string[] = []

@@ -55,22 +55,22 @@ export async function callOpenAI(modelKey: string, priceData: any, newsData: str
   safeLog(`價格數據:`, priceData)
   safeLog(`新聞數據: ${newsData.length} 條`)
 
-  const prompt = `請你扮演一位專業的國際政治與安全分析師，結合公開資料與歷史案例，評估中華人民共和國在未來三個月內對台灣發動軍事行動的可能性（以百分比形式呈現）。  
+  const prompt = `請你扮演一位專業的國際政治與安全分析師，結合公開資料與歷史案例，評估中華人民共和國在未來三個月內對台灣發動軍事行動的可能性（以百分比形式呈現）。
 
-請在分析中考慮以下面向：  
-1. 兩岸近期的軍事演習與活動（如共機繞台、海上演習等）  
-2. 中國國內的政治壓力與決策節奏（例：重要政治會議、領導人動向）  
-3. 美國及盟國在台灣周邊的軍事部署與外交互動  
-4. 經濟情勢與對外制裁／反制裁影響  
-5. 地緣政治事件（如南海、朝鮮半島局勢）對中國決策的牽動  
-6. 歷史上類似時機點（如金門炮戰、近年演習升級）之比較  
+請在分析中考慮以下面向：
+1. 兩岸近期的軍事演習與活動（如共機繞台、海上演習等）
+2. 中國國內的政治壓力與決策節奏（例：重要政治會議、領導人動向）
+3. 美國及盟國在台灣周邊的軍事部署與外交互動
+4. 經濟情勢與對外制裁／反制裁影響
+5. 地緣政治事件（如南海、朝鮮半島局勢）對中國決策的牽動
+6. 歷史上類似時機點（如金門炮戰、近年演習升級）之比較
 
-## 當前市場指標數據 (2025年8月3日)
+## 當前市場指標數據
 **黃金價格**: $${priceData.gold?.price || 'N/A'} USD/盎司 (變化: ${priceData.gold?.change || 0}%)
 **小麥價格**: $${priceData.wheat?.price || 'N/A'} USD/蒲式耳 (變化: ${priceData.wheat?.change || 0}%)
 *數據來源: ${priceData.gold?.source || 'N/A'}, 更新時間: ${priceData.gold?.lastUpdate ? new Date(priceData.gold.lastUpdate).toLocaleString('zh-TW') : 'N/A'}*
 
-## 2025年最新相關新聞動態
+## 最新相關新聞動態
 ${newsData.map((news, index) => `${index + 1}. ${news}`).join('\n')}
 
 ### 1. JSON 格式回覆
@@ -80,14 +80,14 @@ ${newsData.map((news, index) => `${index + 1}. ${news}`).join('\n')}
 \`\`\`json
 {
   "overall_assessment": {
-    "probability": "xx%",           // 未來三個月內中國攻台的總體機率
-    "confidence_level": "高/中/低"  // AI 對此評估的信心水準
+    "probability": "xx%",
+    "confidence_level": "高/中/低"
   },
   "indicator_analysis": [
     {
       "name": "軍事演習動態",
-      "current_status": "...",     // 簡要描述
-      "impact_score": "xx%",       // 對風險影響佔比
+      "current_status": "...",
+      "impact_score": "xx%",
       "trend": "升高/穩定/降低"
     },
     {
@@ -142,7 +142,7 @@ ${newsData.map((news, index) => `${index + 1}. ${news}`).join('\n')}
 4. **可能後果**
 5. **建議對策**
 
-請以上述 Markdown 結構回覆，切勿省略任何步驟和欄位，若無資料請填「N/A」。`
+請以上述 Markdown 結構回覆，切勿省略任何步驟和欄位，若無資料請填「N/A」。`}]}}}
 
   try {
     safeLog(`準備調用 OpenAI API，模型: ${apiModel}`)
