@@ -1,14 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import fetch from 'node-fetch';
-
-// Helper function to decode HTML entities
-function decodeHtmlEntities(text: string): string {
-    return text.replace(/&quot;/g, '"')
-               .replace(/&amp;/g, '&')
-               .replace(/&lt;/g, '<')
-               .replace(/&gt;/g, '>')
-               .replace(/&#39;/g, "'");
-}
+import * as cheerio from 'cheerio';
 
 export default async function handler(
   request: VercelRequest,
@@ -35,29 +27,30 @@ export default async function handler(
 
     const html = await fetchResponse.text();
     
+    const $ = cheerio.load(html);
     const articles: string[] = [];
-    // Regex to find article links and titles within the script tags or in the main body
-    const pattern = /<a[^>]+href="\.\/articles\/([^?]+)[^>]*>\s*<h3[^>]*>([^<]+)<\/h3>|<h3[^>]*class="[^>]*">\s*<a[^>]*>([^<]+)<\/a>\s*<\/h3>/g;
-    let match;
+    const seenTitles = new Set<string>();
 
-    while ((match = pattern.exec(html)) !== null) {
-        const title = match[2] || match[3];
-        if (title && title.length > 15 && !articles.includes(title)) {
-            articles.push(decodeHtmlEntities(title.trim()));
+    // 優先選擇包含標題和連結的結構
+    $('a[href*="./articles/"]').each((i, el) => {
+        const titleElement = $(el).find('h3, h4');
+        const title = titleElement.text().trim();
+        if (title && title.length > 15 && !seenTitles.has(title)) {
+            articles.push(title);
+            seenTitles.add(title);
         }
-        if (articles.length >= 10) break;
-    }
+    });
 
-    // Fallback regex if the main one fails
-    if (articles.length === 0) {
-        const fallbackPattern = /<h3[^>]*>(.*?)<\/h3>/g;
-        while ((match = fallbackPattern.exec(html)) !== null) {
-            const cleanedTitle = match[1].replace(/<[^>]*>/g, '').trim();
-            if (cleanedTitle.length > 15 && !articles.includes(cleanedTitle)) {
-                articles.push(decodeHtmlEntities(cleanedTitle));
+    // 如果主要選擇器找不到，使用備用方案
+    if (articles.length < 10) {
+        $('h3, h4').each((i, el) => {
+            if (articles.length >= 10) return;
+            const title = $(el).text().trim();
+            if (title && title.length > 15 && !seenTitles.has(title)) {
+                articles.push(title);
+                seenTitles.add(title);
             }
-            if (articles.length >= 10) break;
-        }
+        });
     }
 
     return response.status(200).json({ news: articles });
