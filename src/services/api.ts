@@ -180,6 +180,7 @@ ${newsData.map((news, index) => `${index + 1}. ${news}`).join('\n')}
     }
 
     const data = await response.json()
+    console.log('OpenAI API response data:', JSON.stringify(data, null, 2));
     const resultContent = endpoint.includes('/responses')
       ? (data.choices?.[0]?.message?.content || data.choices?.[0]?.text || data.choices?.[0]?.content || '')
       : (data.choices?.[0]?.message?.content || '')
