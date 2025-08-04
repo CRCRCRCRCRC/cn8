@@ -148,21 +148,18 @@ ${newsData.map((news, index) => `${index + 1}. ${news}`).join('\n')}
     safeLog(`準備調用 OpenAI API，模型: ${apiModel}`)
     safeLog(`API Key 長度: ${OPENAI_API_KEY.length}`)
     
-    const requestBody = {
+    const requestBodyBase = {
       model: apiModel,
-      messages: [
-        {
-          role: 'system',
-          content: '你是一位專業的國際政治與安全分析師，專精於台海情勢分析。'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
       max_tokens: 4000,
       temperature: 0.7,
     }
+    const chatMessages = [
+      { role: 'system', content: '你是一位專業的國際政治與安全分析師，專精於台海情勢分析。' },
+      { role: 'user', content: prompt },
+    ]
+    const requestBody = endpoint.includes('/responses')
+      ? { ...requestBodyBase, input: chatMessages }
+      : { ...requestBodyBase, messages: chatMessages }
     
     safeLog('請求體:', JSON.stringify(requestBody, null, 2))
     
