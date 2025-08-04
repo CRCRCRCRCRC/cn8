@@ -31,6 +31,18 @@ export async function callOpenAI(modelKey: string, priceData: any, newsData: str
   // 根據使用者選擇的模型鍵取得對應的 OpenAI 模型 ID
   const modelConfig = AI_MODELS[modelKey as keyof typeof AI_MODELS]
   const apiModel = modelConfig ? modelConfig.apiModel : modelKey
+  
+  // 根據模型決定使用 Responses API 或 Chat Completions
+  const responsesAPIModels = new Set([
+    'o4-mini-2025-04-16',
+    'o3-2025-04-16',
+    'o3-pro-2025-06-10',
+    'o3-deep-research-2025-06-26',
+    'o4-mini-deep-research-2025-06-26',
+  ])
+  const endpoint = responsesAPIModels.has(apiModel)
+    ? 'https://api.openai.com/v1/responses'
+    : 'https://api.openai.com/v1/chat/completions'
   if (!OPENAI_API_KEY) {
     safeError('AI API KEY not configured')
     throw new Error('AI API KEY not configured')
@@ -154,7 +166,7 @@ ${newsData.map((news, index) => `${index + 1}. ${news}`).join('\n')}
     
     safeLog('請求體:', JSON.stringify(requestBody, null, 2))
     
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${OPENAI_API_KEY}`,
