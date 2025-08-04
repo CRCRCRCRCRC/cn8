@@ -8,12 +8,12 @@ const OPENAI_API_KEY = ENV_CONFIG.OPENAI_API_KEY
 
 // AI 模型配置 - 完全按照開發計畫.md
 export const AI_MODELS = {
-  'gpt-4.1-nano-2025-04-14': { cost: 2.5, name: 'GPT-4.1 Nano', apiModel: 'gpt-4' },
-  'o4-mini-2025-04-16': { cost: 27.5, name: 'O4 Mini', apiModel: 'gpt-4' },
-  'o3-2025-04-16': { cost: 50, name: 'O3', apiModel: 'gpt-4' },
-  'o3-pro-2025-06-10': { cost: 500, name: 'O3 Pro', apiModel: 'gpt-4' },
-  'o3-deep-research-2025-06-26': { cost: 250, name: 'O3 Deep Research', apiModel: 'gpt-4' },
-  'o4-mini-deep-research-2025-06-26': { cost: 50, name: 'O4 Mini Deep Research', apiModel: 'gpt-4' },
+  'gpt-4.1-nano-2025-04-14': { cost: 2.5, name: 'GPT-4.1 Nano', apiModel: 'gpt-4.1-nano-2025-04-14' },
+  'o4-mini-2025-04-16': { cost: 27.5, name: 'O4 Mini', apiModel: 'o4-mini-2025-04-16' },
+  'o3-2025-04-16': { cost: 50, name: 'O3', apiModel: 'o3-2025-04-16' },
+  'o3-pro-2025-06-10': { cost: 500, name: 'O3 Pro', apiModel: 'o3-pro-2025-06-10' },
+  'o3-deep-research-2025-06-26': { cost: 250, name: 'O3 Deep Research', apiModel: 'o3-deep-research-2025-06-26' },
+  'o4-mini-deep-research-2025-06-26': { cost: 50, name: 'O4 Mini Deep Research', apiModel: 'o4-mini-deep-research-2025-06-26' },
 }
 
 // 獲取真實價格數據 - 使用改進的服務
@@ -36,6 +36,8 @@ export async function callOpenAI(modelKey: string, priceData: any, newsData: str
     throw new Error('AI API KEY not configured')
   }
   
+  // 移除過於嚴格的 API key 格式檢查，因為新的 OpenAI key 格式可能不同
+  
   safeLog(`嚴格使用用戶選擇的模型鍵: ${modelKey}，對應 OpenAI 模型 ID: ${apiModel}`)
   safeLog(`絕不擅自更改模型名稱`)
   safeLog(`價格數據:`, priceData)
@@ -52,9 +54,9 @@ export async function callOpenAI(modelKey: string, priceData: any, newsData: str
 6. 歷史上類似時機點（如金門炮戰、近年演習升級）之比較  
 
 ## 當前市場指標數據 (2025年8月3日)
-**黃金價格**: $${priceData.gold.price} USD/盎司 (變化: ${priceData.gold.change}%)
-**小麥價格**: $${priceData.wheat.price} USD/蒲式耳 (變化: ${priceData.wheat.change}%)
-*數據來源: ${priceData.gold.source}, 更新時間: ${new Date(priceData.gold.lastUpdate).toLocaleString('zh-TW')}*
+**黃金價格**: $${priceData.gold?.price || 'N/A'} USD/盎司 (變化: ${priceData.gold?.change || 0}%)
+**小麥價格**: $${priceData.wheat?.price || 'N/A'} USD/蒲式耳 (變化: ${priceData.wheat?.change || 0}%)
+*數據來源: ${priceData.gold?.source || 'N/A'}, 更新時間: ${priceData.gold?.lastUpdate ? new Date(priceData.gold.lastUpdate).toLocaleString('zh-TW') : 'N/A'}*
 
 ## 2025年最新相關新聞動態
 ${newsData.map((news, index) => `${index + 1}. ${news}`).join('\n')}
@@ -131,31 +133,40 @@ ${newsData.map((news, index) => `${index + 1}. ${news}`).join('\n')}
 請以上述 Markdown 結構回覆，切勿省略任何步驟和欄位，若無資料請填「N/A」。`
 
   try {
+    safeLog(`準備調用 OpenAI API，模型: ${apiModel}`)
+    safeLog(`API Key 長度: ${OPENAI_API_KEY.length}`)
+    
+    const requestBody = {
+      model: apiModel,
+      messages: [
+        {
+          role: 'system',
+          content: '你是一位專業的國際政治與安全分析師，專精於台海情勢分析。'
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
+      max_tokens: 4000,
+      temperature: 0.7,
+    }
+    
+    safeLog('請求體:', JSON.stringify(requestBody, null, 2))
+    
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${OPENAI_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: apiModel, // 使用映射後的 OpenAI 模型 ID
-        messages: [
-          {
-            role: 'system',
-            content: '你是一位專業的國際政治與安全分析師，專精於台海情勢分析。'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        max_tokens: 4000, // 足夠的 token 數量獲得詳細分析
-        temperature: 0.7,
-      }),
+      body: JSON.stringify(requestBody),
     })
 
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status}`)
+      const errorText = await response.text()
+      safeError(`OpenAI API error details:`, { status: response.status, statusText: response.statusText, body: errorText })
+      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`)
     }
 
     const data = await response.json()
