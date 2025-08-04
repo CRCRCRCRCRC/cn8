@@ -26,7 +26,9 @@ export default async function handler(
     }
 
     const html = await fetchResponse.text();
-    
+    console.log('Fetched HTML length:', html.length);
+    // console.log('Fetched HTML content:', html.substring(0, 500)); // Log first 500 chars
+
     const $ = cheerio.load(html);
     const articles: string[] = [];
     const seenTitles = new Set<string>();
@@ -41,6 +43,8 @@ export default async function handler(
         }
     });
 
+    console.log(`Found ${articles.length} articles with primary selector.`);
+
     // 如果主要選擇器找不到，使用備用方案
     if (articles.length < 10) {
         $('h3, h4').each((i, el) => {
@@ -51,8 +55,10 @@ export default async function handler(
                 seenTitles.add(title);
             }
         });
+        console.log(`Found ${articles.length} articles after fallback.`);
     }
 
+    console.log('Successfully processed news articles.');
     return response.status(200).json({ news: articles });
   } catch (error: any) {
     console.error('Error fetching news:', error);
