@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { motion } from 'framer-motion'
 import { Brain, Loader, AlertTriangle, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
