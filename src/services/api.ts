@@ -142,7 +142,7 @@ ${newsData.map((news, index) => `${index + 1}. ${news}`).join('\n')}
 4. **可能後果**
 5. **建議對策**
 
-請以上述 Markdown 結構回覆，切勿省略任何步驟和欄位，若無資料請填「N/A」。`}]}}}
+請以上述 Markdown 結構回覆，切勿省略任何步驟和欄位，若無資料請填「N/A」。`
 
   try {
     safeLog(`準備調用 OpenAI API，模型: ${apiModel}`)
