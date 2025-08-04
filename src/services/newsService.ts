@@ -69,10 +69,15 @@ async function fetchFromGoogleNews(): Promise<string[]> {
 
       const data = await response.json();
       if (data.news && Array.isArray(data.news)) {
+        // 檢查是否為模擬數據
+        if (data.isMockData) {
+          safeLog(`使用模擬數據回應查詢 "${query}": ${data.message || '網路限制'}`);
+        }
+        
         data.news.forEach((title: string) => {
           if (title.length > 15 && !newsSet.has(title)) {
             newsSet.add(title);
-            safeLog(`找到新聞: ${title}`);
+            safeLog(`找到新聞: ${title}${data.isMockData ? ' (模擬數據)' : ''}`);
           }
         });
       }
