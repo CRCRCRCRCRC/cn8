@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Brain, Loader, AlertTriangle, TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 interface AnalysisSectionProps {
   isDevMode: boolean
@@ -269,13 +271,13 @@ export default function AnalysisSection({ isDevMode }: AnalysisSectionProps) {
           {/* Detailed Report */}
           {detailedReport && (
             <div className="cyber-border rounded-lg p-6 bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-sm">
-              <h3 className="text-2xl font-cyber font-bold mb-6 cyber-text">詳細分析報告</h3>
-              <div className="prose prose-invert max-w-none">
-                <div 
-                  className="text-gray-300 font-mono text-sm leading-relaxed whitespace-pre-wrap"
-                  dangerouslySetInnerHTML={{ __html: detailedReport.replace(/\n/g, '<br>') }}
-                />
-              </div>
+              <h3 className=\"text-2xl font-cyber font-bold mb-6 cyber-text\">詳細分析報告</h3>
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                className=\"prose prose-invert max-w-none\"
+              >
+                {detailedReport}
+              </ReactMarkdown>
             </div>
           )}
         </motion.div>
