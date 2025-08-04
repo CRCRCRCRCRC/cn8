@@ -51,77 +51,45 @@ async function fetchFromGoogleNews(): Promise<string[]> {
     '共軍繞台軍機活動',
     '美台軍售防務合作',
     '南海台海地緣政治'
-  ]
-  
-  let allNews: string[] = []
-  // 使用多個代理服務
-  const proxyServices = [
-    'https://api.codetabs.com/v1/proxy?quest=',
-    'https://cors-anywhere.herokuapp.com/',
-    'https://api.allorigins.win/raw?url='
-  ]
-  
-  for (const query of searchQueries.slice(0, 2)) { // 只取前2個查詢避免超時
-    let success = false
-    
-    // 嘗試多個代理服務
-    for (const proxyUrl of proxyServices) {
-      if (success) break
+  ];
+
+  let allNews: string[] = [];
+  const newsSet = new Set<string>();
+
+  // 並行獲取多個查詢結果
+  const promises = searchQueries.map(async (query) => {
+    try {
+      safeLog(`通過後端代理搜索關鍵字: ${query}`);
+      const response = await fetch(`/api/news?query=${encodeURIComponent(query)}`);
       
-      try {
-        safeLog(`搜索關鍵字: ${query} 使用代理: ${proxyUrl}`)
-        
-        const newsUrl = encodeURIComponent(`https://news.google.com/search?q=${encodeURIComponent(query)}&hl=zh-TW&gl=TW&ceid=TW:zh-Hant`)
-        
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 3000) // 3秒超時
-        
-        const response = await fetch(proxyUrl + newsUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          },
-          signal: controller.signal
-        })
-        
-        clearTimeout(timeoutId)
-      
-      if (response.ok) {
-        const html = await response.text()
-        safeLog(`成功獲取新聞: ${query}`)
-        
-        const titlePatterns = [
-          /<article[^>]*>[\s\S]*?<h3[^>]*>(.*?)<\/h3>/g,
-          /<h3[^>]*class="[^"]*"[^>]*>(.*?)<\/h3>/g,
-          /<h4[^>]*>(.*?)<\/h4>/g,
-          /data-n-tid[^>]*>(.*?)<\/a>/g,
-          /<a[^>]*data-n-tid[^>]*>(.*?)<\/a>/g,
-        ]
-        
-        for (const pattern of titlePatterns) {
-          let match
-          while ((match = pattern.exec(html)) !== null && allNews.length < 20) {
-            let title = match[1].replace(/<[^>]*>/g, '').trim()
-            title = title.replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-            
-            if (title.length > 15 && 
-                !allNews.includes(title) && 
-                (title.includes('台') || title.includes('中國') || title.includes('美') || title.includes('軍') || title.includes('海'))) {
-              allNews.push(title)
-              safeLog(`找到新聞: ${title}`)
-            }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `請求失敗，狀態碼: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.news && Array.isArray(data.news)) {
+        data.news.forEach((title: string) => {
+          if (title.length > 15 && !newsSet.has(title)) {
+            newsSet.add(title);
+            safeLog(`找到新聞: ${title}`);
           }
-        }
+        });
       }
     } catch (error) {
-      safeError(`搜索 "${query}" 時發生錯誤:`, error)
-      continue
+      safeError(`搜索 "${query}" 時發生錯誤:`, error);
     }
-    
-    // 短暫延遲避免被限制
-    await new Promise(resolve => setTimeout(resolve, 500))
-  }
+  });
+
+  await Promise.all(promises);
+
+  allNews = Array.from(newsSet);
   
-  return allNews.slice(0, 12)
+  // 如果還是沒有新聞，返回一個空陣列，讓主函數處理備用數據
+  if (allNews.length === 0) {
+      safeLog('後端代理未能獲取任何新聞。');
+  }
+
+  return allNews.slice(0, 12);
 }
 }
