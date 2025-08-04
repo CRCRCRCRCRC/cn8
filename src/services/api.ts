@@ -153,12 +153,13 @@ ${newsData.map((news, index) => `${index + 1}. ${news}`).join('\n')}
       max_tokens: 4000,
       temperature: 0.7,
     }
+    const systemInstruction = '你是一位專業的國際政治與安全分析師，專精於台海情勢分析。'
     const chatMessages = [
-      { role: 'system', content: '你是一位專業的國際政治與安全分析師，專精於台海情勢分析。' },
+      { role: 'system', content: systemInstruction },
       { role: 'user', content: prompt },
     ]
     const requestBody = endpoint.includes('/responses')
-      ? { ...requestBodyBase, input: chatMessages }
+      ? { ...requestBodyBase, instructions: systemInstruction, input: prompt }
       : { ...requestBodyBase, messages: chatMessages }
     
     safeLog('請求體:', JSON.stringify(requestBody, null, 2))
