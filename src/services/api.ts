@@ -159,8 +159,8 @@ ${newsData.map((news, index) => `${index + 1}. ${news}`).join('\n')}
       { role: 'user', content: prompt },
     ]
     const requestBody = endpoint.includes('/responses')
-      ? { ...requestBodyBase, instructions: systemInstruction, input: prompt }
-      : { ...requestBodyBase, messages: chatMessages }
+      ? { model: apiModel, instructions: systemInstruction, input: prompt }
+      : { model: apiModel, max_tokens: 4000, temperature: 0.7, messages: chatMessages }
     
     safeLog('請求體:', JSON.stringify(requestBody, null, 2))
     
