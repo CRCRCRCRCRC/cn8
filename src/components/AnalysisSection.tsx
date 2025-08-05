@@ -171,14 +171,35 @@ export default function AnalysisSection() {
       }
       
       // 提取詳細報告
-      const reportStart = Math.max(
-        aiResponse.indexOf('```', aiResponse.indexOf('```json') + 7) + 3,
-        aiResponse.indexOf('}') + 1
-      )
-      const detailedReport = aiResponse.substring(reportStart).trim()
+      let detailedReport = ''
+      
+      try {
+        // 嘗試從 AI 回應中提取詳細報告
+        const jsonEndIndex = aiResponse.lastIndexOf('}')
+        if (jsonEndIndex !== -1) {
+          // 查找 JSON 結束後的內容
+          const afterJson = aiResponse.substring(jsonEndIndex + 1).trim()
+          
+          // 移除可能的 markdown 結束標記
+          const cleanReport = afterJson.replace(/^```\s*/, '').trim()
+          
+          if (cleanReport && cleanReport.length > 10) {
+            detailedReport = cleanReport
+          }
+        }
+        
+        // 如果沒有找到詳細報告，生成一個基於分析結果的報告
+        if (!detailedReport) {
+          detailedReport = generateDetailedReport(analysis)
+        }
+        
+      } catch (reportError) {
+        console.error('詳細報告提取錯誤:', reportError)
+        detailedReport = generateDetailedReport(analysis)
+      }
 
       setAnalysisResult(analysis)
-      setDetailedReport(detailedReport || '詳細報告生成中...')
+      setDetailedReport(detailedReport)
 
       // 只有在成功完成分析後才扣除積分
       if (!isDevMode) {
@@ -194,6 +215,43 @@ export default function AnalysisSection() {
     } finally {
       setIsAnalyzing(false)
     }
+  }
+
+  // 生成格式化的詳細報告
+  const generateDetailedReport = (analysis: AnalysisResult): string => {
+    return `# 台海情勢深度分析報告
+
+## 📊 總體風險評估
+
+**攻台機率**: ${analysis.overall_assessment.probability}  
+**信心水準**: ${analysis.overall_assessment.confidence_level}
+
+## 🎯 關鍵指標分析
+
+${analysis.indicator_analysis.map(indicator => `
+### ${indicator.name}
+
+- **當前狀態**: ${indicator.current_status}
+- **影響程度**: ${indicator.impact_score}
+- **趨勢**: ${indicator.trend}
+`).join('')}
+
+## ⚠️ 關鍵觸發點
+
+${analysis.key_triggers.map(trigger => `- ${trigger}`).join('\n')}
+
+## 🛡️ 緩解因素
+
+${analysis.mitigation_factors.map(factor => `- ${factor}`).join('\n')}
+
+## 📈 風險評估總結
+
+基於當前的軍事、政治、經濟等多維度指標分析，台海地區在未來三個月內的整體風險水準為 **${analysis.overall_assessment.probability}**。
+
+這一評估結果考慮了各項關鍵指標的當前狀態和發展趨勢，以及可能的觸發因素和緩解機制。建議持續關注相關動態，特別是軍事演習、政治聲明和國際關係變化。
+
+---
+*本報告基於公開資訊和 AI 分析生成，僅供參考，不構成任何政策建議。*`
   }
 
   const getTrendIcon = (trend: string) => {
