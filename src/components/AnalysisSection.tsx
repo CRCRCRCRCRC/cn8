@@ -418,12 +418,76 @@ export default function AnalysisSection() {
           {detailedReport && (
             <div className="cyber-border rounded-lg p-6 bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-sm">
               <h3 className="text-2xl font-cyber font-bold mb-6 cyber-text">詳細分析報告</h3>
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                className="prose prose-invert max-w-none"
-              >
-                {detailedReport}
-              </ReactMarkdown>
+              <div className="prose prose-invert max-w-none">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    h1: ({children}) => (
+                      <h1 className="text-3xl font-cyber font-bold text-cyber-primary mb-6 border-b border-cyber-primary/30 pb-3">
+                        {children}
+                      </h1>
+                    ),
+                    h2: ({children}) => (
+                      <h2 className="text-2xl font-cyber font-bold text-cyber-secondary mb-4 mt-8">
+                        {children}
+                      </h2>
+                    ),
+                    h3: ({children}) => (
+                      <h3 className="text-xl font-cyber font-bold text-cyber-accent mb-3 mt-6">
+                        {children}
+                      </h3>
+                    ),
+                    p: ({children}) => (
+                      <p className="text-gray-300 font-mono leading-relaxed mb-4 text-sm">
+                        {children}
+                      </p>
+                    ),
+                    ul: ({children}) => (
+                      <ul className="list-none space-y-2 mb-4 ml-4">
+                        {children}
+                      </ul>
+                    ),
+                    li: ({children}) => (
+                      <li className="text-gray-300 font-mono text-sm flex items-start space-x-2">
+                        <span className="text-cyber-accent mt-1">▸</span>
+                        <span>{children}</span>
+                      </li>
+                    ),
+                    strong: ({children}) => (
+                      <strong className="text-cyber-primary font-bold">
+                        {children}
+                      </strong>
+                    ),
+                    em: ({children}) => (
+                      <em className="text-cyber-accent italic">
+                        {children}
+                      </em>
+                    ),
+                    blockquote: ({children}) => (
+                      <blockquote className="border-l-4 border-cyber-primary/50 pl-4 py-2 bg-gray-800/30 rounded-r-lg mb-4">
+                        {children}
+                      </blockquote>
+                    ),
+                    code: ({children}) => (
+                      <code className="bg-gray-800 text-cyber-accent px-2 py-1 rounded font-mono text-sm">
+                        {children}
+                      </code>
+                    ),
+                    a: ({href, children}) => (
+                      <a 
+                        href={href} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-cyber-primary hover:text-cyber-secondary underline transition-colors duration-200"
+                      >
+                        {children}
+                      </a>
+                    )
+                  }}
+                >
+                  {detailedReport}
+                </ReactMarkdown>
+              </div>
             </div>
           )}
         </motion.div>

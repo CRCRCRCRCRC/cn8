@@ -1,0 +1,249 @@
+AnalysisSection.tsx:57 開始獲取真實數據進行專業分析...
+AnalysisSection.tsx:77 收集到 1 條新聞和市場數據，開始 AI 分析...
+api.ts:237 OpenAI API response data: {
+  "id": "resp_689193afc768819896b72b43b9158e1203c4a21d200aedfa",
+  "object": "response",
+  "created_at": 1754370991,
+  "status": "completed",
+  "background": false,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": "你是一位專業的國際政治與安全分析師，專精於台海情勢分析。你的任務是根據提供的新聞和數據，生成一份結構化的 JSON 格式分析報告。請嚴格遵循指定的 JSON 結構，不要在回覆中包含任何非 JSON 內容、註解或 markdown 標記 (例如 ```json)。你的回覆必須是一個可以直接被程式解析的 JSON 物件。",
+  "max_output_tokens": null,
+  "max_tool_calls": 225,
+  "model": "o4-mini-deep-research-2025-06-26",
+  "output": [
+    {
+      "id": "rs_689193b060a08198b58f9fe3e47f68db03c4a21d200aedfa",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ws_689193b9f89c81988c98cf64962de13203c4a21d200aedfa",
+      "type": "web_search_call",
+      "status": "completed",
+      "action": {
+        "type": "search",
+        "query": "2025 US State Department reaffirm Taiwan peace stability news August"
+      }
+    },
+    {
+      "id": "rs_689193ba7e4c8198a894e65f1fc2e5b203c4a21d200aedfa",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ws_689193bb28e08198bd098fdfca6a73f403c4a21d200aedfa",
+      "type": "web_search_call",
+      "status": "completed",
+      "action": {
+        "type": "open_page",
+        "url": "https://www.reuters.com/world/us/us-senator-wicker-head-senate-armed-services-panel-visit-taiwan-2025-07-31/"
+      }
+    },
+    {
+      "id": "rs_689193bbb8e8819881dcf445bbd1ca8d03c4a21d200aedfa",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ws_689193bc578c81988ba2f69484e223dd03c4a21d200aedfa",
+      "type": "web_search_call",
+      "status": "completed",
+      "action": {
+        "type": "search",
+        "query": "US State Department reaffirm commitment Taiwan peace stability statement 2025"
+      }
+    },
+    {
+      "id": "rs_689193bcde908198bb7cb197d06d4cee03c4a21d200aedfa",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ws_689193bd24308198adac84098e6919f803c4a21d200aedfa",
+      "type": "web_search_call",
+      "status": "completed",
+      "action": {
+        "type": "open_page",
+        "url": "https://www.reuters.com/world/china/taiwan-will-not-provoke-confrontation-with-china-does-not-seek-conflict-2025-07-18/"
+      }
+    },
+    {
+      "id": "rs_689193bd90f0819884deece4287316bb03c4a21d200aedfa",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ws_689193be255c819882076874a09da23d03c4a21d200aedfa",
+      "type": "web_search_call",
+      "status": "completed",
+      "action": {
+        "type": "search",
+        "query": "2025 US State Department reaffirm Taiwan peace and stability commitment"
+      }
+    },
+    {
+      "id": "rs_689193bfab7081988d29d91395ce7cb203c4a21d200aedfa",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ws_689193c06130819897693a34e5e8ac3003c4a21d200aedfa",
+      "type": "web_search_call",
+      "status": "completed",
+      "action": {
+        "type": "search",
+        "query": "2025 台灣 與 解放軍 演習 共機 繞島 最近"
+      }
+    },
+    {
+      "id": "rs_689193c0d5508198b6ff120524391e3f03c4a21d200aedfa",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ws_689193c135888198bcb259efd38fe59003c4a21d200aedfa",
+      "type": "web_search_call",
+      "status": "completed",
+      "action": {
+        "type": "search",
+        "query": "2025 近月 共機 繞台 演習"
+      }
+    },
+    {
+      "id": "rs_689193c1b5208198a6754c64ab66842403c4a21d200aedfa",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ws_689193c21fc88198b3f59eff5b73a57703c4a21d200aedfa",
+      "type": "web_search_call",
+      "status": "completed",
+      "action": {
+        "type": "search",
+        "query": "PLA Taiwan drills near Taiwan militaries June July 2025"
+      }
+    },
+    {
+      "id": "rs_689193c2eea48198bd7b38efd3dacf6503c4a21d200aedfa",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ws_689193c343488198bac3e0baa8e88ee403c4a21d200aedfa",
+      "type": "web_search_call",
+      "status": "completed",
+      "action": {
+        "type": "open_page",
+        "url": null
+      }
+    },
+    {
+      "id": "rs_689193c3a7dc81988898ebe83d1e7d8403c4a21d200aedfa",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ws_689193c421048198ac3fa5a62f98c80b03c4a21d200aedfa",
+      "type": "web_search_call",
+      "status": "completed",
+      "action": {
+        "type": "search",
+        "query": "July 2025 Taiwan 10-day military drills counter Chinese AP News"
+      }
+    },
+    {
+      "id": "rs_689193c4a2c48198ba608e61892fbc5803c4a21d200aedfa",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ws_689193c4eed881988d772e260e718eed03c4a21d200aedfa",
+      "type": "web_search_call",
+      "status": "completed",
+      "action": {
+        "type": "open_page",
+        "url": "https://www.reuters.com/business/aerospace-defense/taiwan-launches-annual-war-games-with-simulated-attacks-against-military-command-2025-07-09/"
+   
+AnalysisSection.tsx:83 AI Response: {
+  "overall_assessment": {
+    "probability": "25%",
+    "confidence_level": "中"
+  },
+  "indicator_analysis": [
+    {
+      "name": "軍事演習動態",
+      "current_status": "中國解放軍近期持續在東海與台海周邊進行大型軍事演習，包括東海長距實彈火力演練，以及多型軍機與航母聯合操演，顯示行動頻率和規模升高 ([www.reuters.com](https://www.reuters.com/world/asia-pacific/china-drills-around-taiwan-continue-gives-them-code-name-strait-thunder-2025-04-02/#:~:text=China%27s%20military%20conducted%20long,and%20numerous%20aircraft%20near%20its)) ([www.reuters.com](https://www.reuters.com/world/china/chinese-carriers-pacific-show-countrys-expansionist-aims-taiwan-says-2025-06-11/#:~:text=Taiwan%27s%20Defence%20Minister%20Wellington%20Koo,marks%20the%20first%20time%20both))。",
+      "impact_score": "30%",
+      "trend": "升高"
+    },
+    {
+      "name": "國內政治壓力",
+      "current_status": "中國領導層持續強調統一大業，並對台獨活動採嚴厲立場；同時面臨經濟放緩與美中貿易戰壓力，政府主要透過民族主義宣傳凝聚支持 ([www.reuters.com](https://www.reuters.com/world/china/xi-says-no-one-can-stop-chinas-reunification-with-taiwan-2024-12-31/#:~:text=Chinese%20President%20Xi%20Jinping%20declared,people%20can%20decide%20their%20future)) ([www.reuters.com](https://www.reuters.com/markets/europe/china-is-confident-achieving-2025-growth-target-says-state-planner-2025-04-28/#:~:text=Despite%20rising%20concerns%20over%20the,China%E2%80%99s%20National%20Development%20and%20Reform))。",
+      "impact_score": "15%",
+      "trend": "穩定"
+    },
+    {
+      "name": "美軍部署與盟友互動",
+      "current_status": "美國近期增加在西太平洋區域的海空兵力部署，並與日本、菲律賓等盟國舉行大型聯合軍演（如Balikatan全區演練），同時美國國會高層訪台計畫升溫，無形中加劇兩岸緊張 ([apnews.com](https://apnews.com/article/faae979065546230ba9b9b12b95c790b#:~:text=The%20U,to%20enhance%20sea%20denial%20and)) ([www.reuters.com](https://www.reuters.com/world/us/us-senator-wicker-head-senate-armed-services-panel-visit-taiwan-2025-07-31/#:~:text=U,visit))。",
+      "impact_score": "20%",
+      "trend": "升高"
+    },
+    {
+      "name": "經濟與制裁情勢",
+      "current_status": "中美貿易戰持續升級，美方對中國加徵高額關稅，中國亦進行報復性措施，但中國官方仍信心維持2025年約5%的經濟增長目標 ([www.reuters.com](https://www.reuters.com/markets/europe/china-is-confident-achieving-2025-growth-target-says-state-planner-2025-04-28/#:~:text=Despite%20rising%20concerns%20over%20the,provides%20a%20solid%20base%20and))。經濟制約和對出口依賴使中國對冒然發動軍事行動有所忌憚。",
+      "impact_score": "10%",
+      "trend": "穩定"
+    },
+    {
+      "name": "其他地緣事件",
+      "current_status": "中國與俄羅斯、朝鮮軍事協作有所增加，美國曾警告這些「威權軸心」可能強化對台行動；南海、東海及朝鮮半島局勢緊張，可能分散或掩護中國的注意力 ([www.ft.com](https://www.ft.com/content/3a31c037-f74c-4e33-9720-0fdc32f5133b#:~:text=During%20a%20speech%20at%20the,North%20Korea%2C%20who%20have%20increased)) ([www.reuters.com](https://www.reuters.com/world/pacific-braces-conflict-eyes-uncertain-us-position-peter-apps-2025-04-04/#:~:text=Tensions%20are%20escalating%20in%20the,Pacific%20deterrence))。",
+      "impact_score": "15%",
+      "trend": "升高"
+    }
+  ],
+  "key_triggers": [
+    "觸發點 1：若台灣方面出現官方推動獨立的政治舉措（例如宣布獨立或通過與中割裂的公投議題），北京可能視之為突破其「紅線」，從而迅速採取軍事行動加以反制。",
+    "觸發點 2：中國在政治敏感時機或重要紀念日（如國慶或解放軍重要大會）舉行高強度軍演，或有北京領導人公開強硬表態，可能使衝突風險急劇升高。"
+  ],
+  "mitigation_factors": [
+    "因應因素 1：美國與盟國在區域內展現強大軍事威懾與承諾（如定期派遣航艦打擊群、部署先進防衛系統），提高了針對台灣發動武力的成本，有助於抑制北京冒然行動 ([apnews.com](https://apnews.com/article/faae979065546230ba9b9b12b95c790b#:~:text=The%20U,to%20enhance%20sea%20denial%20and)) ([www.reuters.com](https://www.reuters.com/world/pacific-braces-conflict-eyes-uncertain-us-position-peter-apps-2025-04-04/#:~:text=Tensions%20are%20escalating%20in%20the,Pacific%20deterrence))。",
+    "因應因素 2：兩岸經貿互賴程度高，中國在國際貿易和供應鏈中佔重要角色。發動軍事衝突將嚴重損害中國經濟利益，加上國際社會可能對侵略行為實施嚴厲制裁 ([www.reuters.com](https://www.reuters.com/markets/europe/china-is-confident-achieving-2025-growth-target-says-state-planner-2025-04-28/#:~:text=Despite%20rising%20concerns%20over%20the,provides%20a%20solid%20base%20and))，迫使北京更謹慎考量後果。"
+  ]
+}
+
+# 背景說明
+近期台海情勢持續緊繃。中國政府高層不斷在公開講話中強調「統一大業」，警告外部勢力勿干涉台灣問題 ([www.reuters.com](https://www.reuters.com/world/china/xi-says-no-one-can-stop-chinas-reunification-with-taiwan-2024-12-31/#:~:text=Chinese%20President%20Xi%20Jinping%20declared,people%20can%20decide%20their%20future)) ([www.reuters.com](https://www.reuters.com/world/china/china-will-work-firmly-advance-reunification-with-taiwan-premier-2025-03-05/#:~:text=Chinese%20Premier%20Li%20Qiang%20affirmed,echoed%20a%20firm%20stance%20on))。與此同時，美國在亞太地區的軍事存在與對台支持也有所加強，例如派遣軍艦通過台海、國會議員訪台等，造成兩岸互動更加敏感且張力上升。而中國國內面臨經濟下行壓力與與美國貿易戰的不確定因素，迫使北京一方面需要維持民族凝聚力，另一方面也需避免經濟遭受過度衝擊。整體來看，兩岸關係具有高度不確定性，未來中國發動軍事行動的可能性存在（本報告預估為約百分之二十五），但實際抉擇仍受到多重因素制約。
+
+# 各指標深度解讀
+
+### 軍事演習動態
+中國解放軍近年加大在台灣周邊的軍事行動力度。2025年4月，中國軍隊在東海進行了「遠海實彈演習」（Strait Thunder-2025A），並對台灣重要港口和能源設施進行遠程精確打擊演練 ([www.reuters.com](https://www.reuters.com/world/asia-pacific/china-drills-around-taiwan-continue-gives-them-code-name-strait-thunder-2025-04-02/#:~:text=China%27s%20military%20conducted%20long,and%20numerous%20aircraft%20near%20its))。6月報導顯示，中國首次派遣兩艘航空母艦（遼寧號與山東號）同時在西太平洋附近演練，一艘甚至進入日本經濟海域 ([www.reuters.com](https://www.reuters.com/world/china/chinese-carriers-pacific-show-countrys-expansionist-aims-taiwan-says-2025-06-11/#:~:text=Taiwan%27s%20Defence%20Minister%20Wellington%20Koo,marks%20the%20first%20time%20both))。與此同時，台灣也啟動年度漢光演習，7月動員史上最多兵力進行聯合防衛演習，並導入新型武器系統 ([www.reuters.com](https://www.reuters.com/business/aerospace-defense/taiwan-launches-annual-war-games-with-simulated-attacks-against-military-command-2025-07-09/#:~:text=Taiwan%20commenced%20its%20largest,22%2C000%20reservists%20and%20introduce%20High))。由此可見，兩岸軍演頻率與強度皆有明顯上升趨勢，彼此監視與試探成為常態。中國按照計畫舉行大規模海空實彈聯合演練，明顯意圖展示武力並警告台獨。
+
+### 國內政治壓力
+中國領導層對台政策持續強硬。北京高層多次公開表示「任何力量都擋不住祖國統一的步伐」 ([www.reuters.com](https://www.reuters.com/world/china/xi-says-no-one-can-stop-chinas-reunification-with-taiwan-2024-12-31/#:~:text=Chinese%20President%20Xi%20Jinping%20declared,people%20can%20decide%20their%20future))。2025年3月，中共全國人大會議中，中國總理李強述職報告刻意不再使用「和平統一」字眼，僅強調「堅定推進祖國統一」 ([www.reuters.com](https://www.reuters.com/world/china/china-will-work-firmly-advance-reunification-with-taiwan-premier-2025-03-05/#:~:text=Chinese%20Premier%20Li%20Qiang%20affirmed,echoed%20a%20firm%20stance%20on))，凸顯對台立場更加強硬。國內方面，隨著經濟成長下滑和失業率上升，民族主義宣傳被加強以轉移矚目，避免社會不滿加劇。若內部壓力加重，北京當局在民族主義戰鼓助推下，可能對外採取更強硬姿態；然而目前尚未出現大規模突發事件來加速決策節奏，兩岸政策仍大體維持現狀。
+
+### 美軍部署與盟友互動
+美國與區域盟友的軍事動向亦是重要變數。近日美國持續在西太平洋部署航母打擊群、潛艇與轟炸機，並擴大與日本、菲律賓及澳洲的聯合軍演 ([apnews.com](https://apnews.com/article/faae979065546230ba9b9b12b95c790b#:~:text=The%20U,to%20enhance%20sea%20denial%20and)) ([www.ft.com](https://www.ft.com/content/fbbf8d67-0c67-4e3a-b590-15438bfc5202#:~:text=maritime%20tensions%20given%20China%27s%20broad,This%20expansion))。例如2025年4月，美菲「肩並肩」聯合演習中部署了反艦飛彈系統，並進行模擬擊退敵機、登島與海上防禦等演練 ([apnews.com](https://apnews.com/article/faae979065546230ba9b9b12b95c790b#:~:text=The%20U,to%20enhance%20sea%20denial%20and)) ([www.ft.com](https://www.ft.com/content/c680b509-1f3a-4725-a883-52e4e23b8fa7#:~:text=U,This%20enhanced))；2025年7月，美國參議院軍事委員會主席訪台，也引發北京不滿 ([www.reuters.com](https://www.reuters.com/world/us/us-senator-wicker-head-senate-armed-services-panel-visit-taiwan-2025-07-31/#:~:text=U,visit))。這些行動表明美國仍然利用直接軍事與外交手段加強對台灣的保障，但同時也可能刺激中國加緊備戰。總體而言，美軍艦機部署和盟友協作均呈現升高趨勢，對台灣構成一定防禦力，也給中國形成壓力。
+
+### 經濟與制裁情勢
+經濟因素對衝突風險具有雙面影響。由於中美貿易戰持續升級，美國對中國大量商品加徵高額關稅，中國亦以報復性關稅回應，造成雙方經濟摩擦明顯加劇 ([www.reuters.com](https://www.reuters.com/markets/europe/china-is-confident-achieving-2025-growth-target-says-state-planner-2025-04-28/#:~:text=Despite%20rising%20concerns%20over%20the,provides%20a%20solid%20base%20and))。中國官方仍堅定達成約5%的年度增長目標，但多家國際機構已下調北京經濟預期，指出中國面臨通縮風險和房地產危機 ([www.reuters.com](https://www.reuters.com/markets/europe/china-is-confident-achieving-2025-growth-target-says-state-planner-2025-04-28/#:~:text=Despite%20rising%20concerns%20over%20the,Goldman%20Sachs%2C%20and%20UBS%20have))。這意味中國領導人需兼顧經濟穩定，在政策上多以經濟復甦與對外經商為重。然而，若中國發動大規模軍事行動，將嚴重破壞對外貿易和投資信心，可能引發更嚴厲的經濟制裁。綜合考量，經濟因素雖然對戰略決策構成壓力，但暫時呈現「穩定」而非緊迫的升高傾向。
+
+### 其他地緣事件
+其他地區局勢亦影響兩岸風險。一方面，中國與俄羅斯、北韓等國防軍事關係疑似加深，美國海軍高級官員已警告中國與俄朝形成「威權軸心」 ([www.ft.com](https://www.ft.com/content/3a31c037-f74c-4e33-9720-0fdc32f5133b#:~:text=During%20a%20speech%20at%20the,North%20Korea%2C%20who%20have%20increased))。这些国家在武器技術與作戰上可能相互支援，共同對抗美日等民主國家潛在聯合行動。另一方面，南海與東海問題也在醞釀張力，例如南海仲裁爭議、釣魚島（尖閣諸島）主權爭端，都讓區域軍事部署更複雜。朝鮮半島核武問題時有升溫，美軍與韓日同盟進行聯合演練來威懾平壤。這些多重衝突點可能分散北京資源，亦可能提供中國制造軍事活動掩護的機會。整體而言，區域內大國博弈態勢趋于升高，對台灣形成複合性影響。
+
+# 風險觸發情境舉例
+- 觸發點1：**台灣宣布進一步獨立計畫** — 若台灣政府在未來數月內提出重大政治舉措（如通過「台獨」修憲或舉行獨立公投），北京可能認為此舉已經觸及其「紅線」，進而加速決策並以軍事行動進行威懾或懲戒。這一情境下，中國可能以全國性慶典或軍演為掩護，迅速發動遠程導彈威脅或海軍封鎖等行動。
+- 觸發點2：**中國高層表態與軍演的組合** — 在重要節慶（如國慶日）或政治會議期間，中國領導人若公開宣示統一時間表或下達強硬指令，並在同時由軍方舉行超常規大規模演習，兩岸緊張度將猛增。這可能誘發台方戒備並要求外部援助，導致誤判升級，形成快速惡化的衝突循環。
+
+# 可能後果
+若中國決定發動軍事行動，短期內將對台灣構成直接威脅。解放軍可能先以封鎖或局部打擊開始，佔領關鍵島嶼或進行飛彈試射以壓制台海防禦；台灣政府則會啟動防衛體系並向美國及印太盟友請求協助。若事態進一步升溫，美國有可能動用在印太地區的軍力支援台灣，甚至例行宣稱保護台海安全的承諾。這樣的衝突對區域安全將是重大衝擊，可能引發中美衝突或全面戰爭的風險。經濟方面，台灣和中國經濟體系將嚴重受創，全球供應鏈與股市可能劇烈震盪，投資者避險情緒高漲，金價與主要商品價格上升。戰爭將帶來人道災難，如大量平民流離失所和基礎設施遭毀壞。對國際政治格局而言，一旦中國武力犯台，西方國家可能聯合嚴厲經濟與外交制裁中國，區域軍事同盟機制（如美日韓聯防）也將徹底運作起來，冷戰式對峙升級，印太地區長期陷入動盪。
+
+# 建議對策
+**1. 強化聯合威懾與軍事準備**：持續加強台灣自身防禦能力是必要手段，包括接受現代化武器系統與訓練。同時，美國及盟友應維持在台灣周邊地區高強度軍事演習與出勤，以展示堅定承諾。這種威懾能夠提高北京發動攻勢的成本，延誤其決策時間，有助挫阻攻擊意圖。情報共享與制空權維持也應同步加強，確保預警能力。
+**2. 拓展高層交流與危機管控機制**：儘管兩岸政治互信不足，但維持軍警溝通機制及防止誤判很重要。建議利用第三方節點（如國際組織或盟友協調）建立緊急熱線，同時推動台海現狀下的外交互動，解決誤會。中美方面也應重申在「反對武力解決台海問題」上的共識，以冷靜政治手段防止危機升級。
+**3. 維持經濟穩定與說服力策略**：中國需認識到經濟穩定優先於短期的政治博弈。持續對話與貿易往來可成為緩解緊張的橋梁，避免被民族主義言論裹挾而忽視長期經濟利益。一旦事態升高，對中國境內外企業與工廠可能造成的損失將是巨大的風險。國際社會亦可利用經濟合作倡導對話精神，降低衝突動機。
+**4. 增進國際共識與外交協調**：台灣應加強與主要民主國家的戰略合作，爭取更多政治支持。同時致力於區域多邊交流，將台灣安全與區域繁榮緊密連結，讓中國明白透過武力改變現狀代價昂貴。最後，可考慮升級兩岸互動中和的議題，例如科技合作或公共衛生紐帶，減少觸發衝突的機會。
+
+總體而言，未來三個月內雖無明確引爆戰爭的必然因素，但多方因素挑戰交錯，仍需密切關注。政府與國際社會必須同步推行威懾與溝通策略，既令潛在侵略者知難而退，又確保危機管理機制有效運作，力圖將風險維持在可控範圍內。
