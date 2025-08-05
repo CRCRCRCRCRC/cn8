@@ -42,6 +42,14 @@ export async function fetchRealNews(): Promise<string[]> {
 
 // 從 Google News 獲取新聞
 async function fetchFromGoogleNews(): Promise<string[]> {
+  // 檢查是否為開發環境
+  const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  
+  if (isDevelopment) {
+    safeLog('開發環境：直接使用模擬新聞數據');
+    return FALLBACK_NEWS_2025.slice(0, 12);
+  }
+
   const searchQueries = [
     '台海軍事演習',
     '中國台灣軍事部署',

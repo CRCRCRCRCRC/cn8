@@ -158,9 +158,34 @@ ${newsData.map((news, index) => `${index + 1}. ${news}`).join('\n')}
       { role: 'system', content: systemInstruction },
       { role: 'user', content: prompt },
     ]
-    const requestBody = endpoint.includes('/responses')
-      ? { model: apiModel, instructions: systemInstruction, input: prompt, stream: false }
-      : { model: apiModel, max_tokens: 4000, temperature: 0.7, messages: chatMessages }
+    // 檢查是否為深度研究模型，需要添加工具配置
+    const isDeepResearchModel = apiModel.includes('deep-research')
+    
+    let requestBody
+    if (endpoint.includes('/responses')) {
+      requestBody = { 
+        model: apiModel, 
+        instructions: systemInstruction, 
+        input: prompt, 
+        stream: false 
+      }
+      
+      // 為深度研究模型添加必要的工具
+      if (isDeepResearchModel) {
+        requestBody.tools = [
+          {
+            type: "web_search_preview"
+          }
+        ]
+      }
+    } else {
+      requestBody = { 
+        model: apiModel, 
+        max_tokens: 4000, 
+        temperature: 0.7, 
+        messages: chatMessages 
+      }
+    }
     
     safeLog('請求體:', JSON.stringify(requestBody, null, 2))
     
