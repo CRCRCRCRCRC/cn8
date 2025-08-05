@@ -26,8 +26,22 @@ export async function fetchRealNews() {
   return await fetchNewsFromService()
 }
 
-// 調用真實 AI API - 嚴格按照用戶選擇的模型
-export async function callOpenAI(modelKey: string, priceData: any, newsData: string[]) {
+// 延遲函數
+function delay(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+// 解析速率限制錯誤中的重試時間
+function parseRetryAfter(errorMessage: string): number {
+  const match = errorMessage.match(/Please try again in (\d+(?:\.\d+)?)s/)
+  if (match) {
+    return Math.ceil(parseFloat(match[1]) * 1000) // 轉換為毫秒並向上取整
+  }
+  return 3000 // 默認等待 3 秒
+}
+
+// 調用真實 AI API - 嚴格按照用戶選擇的模型，包含重試機制
+export async function callOpenAI(modelKey: string, priceData: any, newsData: string[], maxRetries: number = 3) {
   // 根據使用者選擇的模型鍵取得對應的 OpenAI 模型 ID
   const modelConfig = AI_MODELS[modelKey as keyof typeof AI_MODELS]
   const apiModel = modelConfig ? modelConfig.apiModel : modelKey
@@ -144,75 +158,101 @@ ${newsData.map((news, index) => `${index + 1}. ${news}`).join('\n')}
 
 請以上述 Markdown 結構回覆，切勿省略任何步驟和欄位，若無資料請填「N/A」。`
 
-  try {
-    safeLog(`準備調用 OpenAI API，模型: ${apiModel}`)
-    safeLog(`API Key 長度: ${OPENAI_API_KEY.length}`)
-    
-    const requestBodyBase = {
-      model: apiModel,
-      max_tokens: 4000,
-      temperature: 0.7,
+  // 準備請求體
+  const systemInstruction = '你是一位專業的國際政治與安全分析師，專精於台海情勢分析。你的任務是根據提供的新聞和數據，生成一份結構化的 JSON 格式分析報告。請嚴格遵循指定的 JSON 結構，不要在回覆中包含任何非 JSON 內容、註解或 markdown 標記 (例如 ```json)。你的回覆必須是一個可以直接被程式解析的 JSON 物件。'
+  const chatMessages = [
+    { role: 'system', content: systemInstruction },
+    { role: 'user', content: prompt },
+  ]
+  
+  // 檢查是否為深度研究模型，需要添加工具配置
+  const isDeepResearchModel = apiModel.includes('deep-research')
+  
+  let requestBody
+  if (endpoint.includes('/responses')) {
+    requestBody = { 
+      model: apiModel, 
+      instructions: systemInstruction, 
+      input: prompt, 
+      stream: false 
     }
-    const systemInstruction = '你是一位專業的國際政治與安全分析師，專精於台海情勢分析。你的任務是根據提供的新聞和數據，生成一份結構化的 JSON 格式分析報告。請嚴格遵循指定的 JSON 結構，不要在回覆中包含任何非 JSON 內容、註解或 markdown 標記 (例如 ```json)。你的回覆必須是一個可以直接被程式解析的 JSON 物件。'
-    const chatMessages = [
-      { role: 'system', content: systemInstruction },
-      { role: 'user', content: prompt },
-    ]
-    // 檢查是否為深度研究模型，需要添加工具配置
-    const isDeepResearchModel = apiModel.includes('deep-research')
     
-    let requestBody
-    if (endpoint.includes('/responses')) {
-      requestBody = { 
-        model: apiModel, 
-        instructions: systemInstruction, 
-        input: prompt, 
-        stream: false 
+    // 為深度研究模型添加必要的工具
+    if (isDeepResearchModel) {
+      requestBody.tools = [
+        {
+          type: "web_search_preview"
+        }
+      ]
+    }
+  } else {
+    requestBody = { 
+      model: apiModel, 
+      max_tokens: 4000, 
+      temperature: 0.7, 
+      messages: chatMessages 
+    }
+  }
+
+  // 重試邏輯
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      safeLog(`準備調用 OpenAI API，模型: ${apiModel}，嘗試 ${attempt}/${maxRetries}`)
+      safeLog(`API Key 長度: ${OPENAI_API_KEY.length}`)
+      safeLog('請求體:', JSON.stringify(requestBody, null, 2))
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        
+        // 處理速率限制錯誤
+        if (response.status === 429) {
+          const retryAfter = parseRetryAfter(errorText)
+          safeLog(`速率限制錯誤，將在 ${retryAfter}ms 後重試 (嘗試 ${attempt}/${maxRetries})`)
+          
+          if (attempt < maxRetries) {
+            await delay(retryAfter)
+            continue // 重試
+          } else {
+            safeError(`達到最大重試次數，速率限制錯誤:`, { status: response.status, body: errorText })
+            throw new Error(`OpenAI API 速率限制: ${errorText}`)
+          }
+        }
+        
+        // 其他錯誤直接拋出
+        safeError(`OpenAI API error details:`, { status: response.status, statusText: response.statusText, body: errorText })
+        throw new Error(`OpenAI API error: ${response.status} - ${errorText}`)
+      }
+
+      // 成功響應
+      const data = await response.json()
+      console.log('OpenAI API response data:', JSON.stringify(data, null, 2));
+      const messageOutput = data.output?.find((item: any) => item.type === 'message');
+      const resultContent = endpoint.includes('/responses')
+        ? (messageOutput?.content?.[0]?.text || '')
+        : (data.choices?.[0]?.message?.content || '');
+      
+      safeLog(`API 調用成功，嘗試 ${attempt}/${maxRetries}`)
+      return resultContent
+      
+    } catch (error) {
+      // 如果是最後一次嘗試，或者不是網絡錯誤，直接拋出
+      if (attempt === maxRetries || !(error instanceof Error && error.message.includes('fetch'))) {
+        safeError('OpenAI API error:', error)
+        throw error
       }
       
-      // 為深度研究模型添加必要的工具
-      if (isDeepResearchModel) {
-        requestBody.tools = [
-          {
-            type: "web_search_preview"
-          }
-        ]
-      }
-    } else {
-      requestBody = { 
-        model: apiModel, 
-        max_tokens: 4000, 
-        temperature: 0.7, 
-        messages: chatMessages 
-      }
+      // 網絡錯誤，等待後重試
+      safeLog(`網絡錯誤，將在 2 秒後重試 (嘗試 ${attempt}/${maxRetries}):`, error)
+      await delay(2000)
     }
-    
-    safeLog('請求體:', JSON.stringify(requestBody, null, 2))
-    
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody),
-    })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      safeError(`OpenAI API error details:`, { status: response.status, statusText: response.statusText, body: errorText })
-      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`)
-    }
-
-    const data = await response.json()
-    console.log('OpenAI API response data:', JSON.stringify(data, null, 2));
-    const messageOutput = data.output?.find((item: any) => item.type === 'message');
-    const resultContent = endpoint.includes('/responses')
-      ? (messageOutput?.content?.[0]?.text || '')
-      : (data.choices?.[0]?.message?.content || '');
-    return resultContent
-  } catch (error) {
-    safeError('OpenAI API error:', error)
-    throw error
   }
 }
